@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 class TestRestCountries extends Command
 {
     protected $signature = 'app:test-rest {code=ID}';
-    protected $description = 'Test REST Countries API v5';
+    protected $description = 'Test REST Countries API v5 dengan endpoint yang benar';
 
     public function handle()
     {
@@ -16,11 +16,11 @@ class TestRestCountries extends Command
         $apiKey = config('services.rest_countries.api_key');
 
         if (empty($apiKey)) {
-            $this->error("❌ API key tidak ditemukan.");
+            $this->error("❌ API key REST Countries tidak ditemukan.");
             return 1;
         }
 
-        $url = "https://restcountries.com/v5/alpha/{$code}";
+        $url = "https://api.restcountries.com/countries/v5/codes.alpha_2/{$code}";
         $this->info("Mengambil: {$url}");
 
         try {
@@ -32,38 +32,25 @@ class TestRestCountries extends Command
 
             if ($response->successful()) {
                 $data = $response->json();
+                $objects = $data['data']['objects'] ?? $data['objects'] ?? null;
                 
-                // Tampilkan struktur data untuk debugging
-                $this->line("\n📦 Struktur Response:");
-                $this->line(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                $this->newLine();
-
-                // Coba ekstrak nama negara
-                $country = null;
-                if (isset($data[0])) {
-                    $country = $data[0];
-                } elseif (isset($data['data']['objects'][0])) {
-                    $country = $data['data']['objects'][0];
-                } elseif (isset($data['objects'][0])) {
-                    $country = $data['objects'][0];
-                }
-
-                if ($country) {
-                    $name = $country['name']['common'] ?? $country['names']['common'] ?? $country['name'] ?? 'Tidak diketahui';
-                    $this->info("✅ Sukses! Negara: " . $name);
-                    
-                    // Tampilkan beberapa data
-                    $capital = $this->extractCapital($country);
-                    if ($capital) $this->line("Ibukota: " . $capital);
-                    if (isset($country['population'])) $this->line("Populasi: " . number_format($country['population']));
-                    
-                    $currency = $this->extractCurrency($country);
-                    if ($currency) $this->line("Mata uang: " . $currency);
+                if (!empty($objects) && isset($objects[0]['names']['common'])) {
+                    $country = $objects[0];
+                    $this->info("✅ Sukses! Negara: " . $country['names']['common']);
+                    $this->line("Populasi: " . ($country['population'] ?? 'N/A'));
+                    $capital = $country['capitals'][0]['name'] ?? 'N/A';
+                    $this->line("Ibukota: " . $capital);
+                    $currencies = $country['currencies'] ?? [];
+                    $currencyCodes = array_column($currencies, 'code');
+                    $this->line("Mata uang: " . implode(', ', $currencyCodes));
+                    $this->line("Region: " . ($country['region'] ?? 'N/A'));
                 } else {
-                    $this->warn("⚠️ Tidak dapat menemukan data negara.");
+                    $this->warn("⚠️ Data tidak ditemukan. Response:");
+                    $this->line(json_encode($data, JSON_PRETTY_PRINT));
                 }
             } else {
-                $this->error("❌ Gagal: " . $response->body());
+                $this->error("❌ Gagal dengan status " . $response->status());
+                $this->line($response->body());
             }
 
         } catch (\Exception $e) {
@@ -71,25 +58,5 @@ class TestRestCountries extends Command
         }
 
         return 0;
-    }
-
-    private function extractCapital(array $country): ?string
-    {
-        if (isset($country['capital'][0]['name'])) return $country['capital'][0]['name'];
-        if (isset($country['capital'][0])) return $country['capital'][0];
-        if (isset($country['capital'])) return is_array($country['capital']) ? $country['capital'][0] : $country['capital'];
-        return null;
-    }
-
-    private function extractCurrency(array $country): ?string
-    {
-        $currencies = $country['currencies'] ?? [];
-        if (empty($currencies)) return null;
-        
-        if (isset($currencies[0]['code'])) return $currencies[0]['code'];
-        if (isset($currencies[0])) return $currencies[0];
-        
-        $keys = array_keys($currencies);
-        return $keys[0] ?? null;
     }
 }
