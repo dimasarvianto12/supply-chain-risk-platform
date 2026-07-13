@@ -36,14 +36,14 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('compare.index') }}">Compare</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('favorites.index') }}">Favorites</a></li>
                 </ul>
-                <ul class="navbar-nav">
+                {{-- <ul class="navbar-nav">
                     @auth
                         <li class="nav-item"><a class="nav-link" href="#">{{ Auth::user()->name }}</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('logout') }}">Logout</a></li>
                     @else
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
                     @endauth
-                </ul>
+                </ul> --}}
             </div>
         </div>
     </nav>
