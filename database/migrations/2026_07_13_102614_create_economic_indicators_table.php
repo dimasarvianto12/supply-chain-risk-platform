@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('economic_indicators', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('country_id')->constrained()->onDelete('cascade');
+            $table->decimal('gdp', 20, 2)->nullable(); // dalam USD
+            $table->decimal('inflation', 5, 2)->nullable(); // persen
+            $table->integer('year')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('economic_indicators');
+    }
+};

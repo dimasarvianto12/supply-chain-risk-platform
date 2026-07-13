@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Country;
+
 
 Route::get('/', function () {
     return view('home');
@@ -38,6 +40,11 @@ Route::get('/compare', function () {
 Route::get('/favorites', function () {
     return view('home');
 })->name('favorites.index');
+
+Route::get('/test-api', function () {
+    $country = Country::with(['latestWeather', 'latestEconomic'])->where('code', 'ID')->first();
+    dd($country->toArray());
+});
 
 // Route untuk auth (sementara belum dipakai, bisa dikomentari dulu)
 // Route::get('/login', function () { return view('home'); })->name('login');

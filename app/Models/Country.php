@@ -13,6 +13,7 @@ class Country extends Model
         'code', 'name', 'capital', 'population', 'currency', 'flag', 'latitude', 'longitude'
     ];
 
+    // Relasi yang sudah ada
     public function riskScores()
     {
         return $this->hasMany(RiskScore::class);
@@ -26,5 +27,26 @@ class Country extends Model
     public function watchlists()
     {
         return $this->hasMany(Watchlist::class);
+    }
+
+    // Relasi baru untuk ekonomi dan cuaca
+    public function economicIndicators()
+    {
+        return $this->hasMany(EconomicIndicator::class)->latest('year');
+    }
+
+    public function latestEconomic()
+    {
+        return $this->hasOne(EconomicIndicator::class)->latest('year');
+    }
+
+    public function weatherCache()
+    {
+        return $this->hasMany(WeatherCache::class)->latest('recorded_at');
+    }
+
+    public function latestWeather()
+    {
+        return $this->hasOne(WeatherCache::class)->latest('recorded_at');
     }
 }
