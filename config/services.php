@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    // ===== TAMBAHKAN INI DI BAWAH =====
+    'rest_countries' => [
+        'api_key' => env('REST_COUNTRIES_API_KEY'),
+    ],
+
+    'exchange_rate' => [
+        'api_key' => env('EXCHANGE_RATE_API_KEY'),
+    ],
+
 ];

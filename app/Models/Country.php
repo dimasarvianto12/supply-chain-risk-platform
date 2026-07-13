@@ -10,7 +10,8 @@ class Country extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code', 'name', 'capital', 'population', 'currency', 'flag', 'latitude', 'longitude'
+        'code', 'name', 'capital', 'population', 'currency', 'flag', 
+        'region', 'latitude', 'longitude'
     ];
 
     // Relasi yang sudah ada
@@ -29,7 +30,6 @@ class Country extends Model
         return $this->hasMany(Watchlist::class);
     }
 
-    // Relasi baru untuk ekonomi dan cuaca
     public function economicIndicators()
     {
         return $this->hasMany(EconomicIndicator::class)->latest('year');
@@ -48,5 +48,16 @@ class Country extends Model
     public function latestWeather()
     {
         return $this->hasOne(WeatherCache::class)->latest('recorded_at');
+    }
+
+    // Relasi baru untuk kurs
+    public function currencyRates()
+    {
+        return $this->hasMany(CurrencyRate::class)->latest('recorded_at');
+    }
+
+    public function latestCurrencyRate()
+    {
+        return $this->hasOne(CurrencyRate::class)->latest('recorded_at');
     }
 }
