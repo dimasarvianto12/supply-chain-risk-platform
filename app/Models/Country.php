@@ -20,6 +20,11 @@ class Country extends Model
         return $this->hasMany(RiskScore::class);
     }
 
+    public function latestRiskScore()
+    {
+        return $this->hasOne(RiskScore::class)->latest('date');
+    }
+    
     public function news()
     {
         return $this->hasMany(NewsCache::class);

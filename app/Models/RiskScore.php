@@ -10,7 +10,8 @@ class RiskScore extends Model
     use HasFactory;
 
     protected $fillable = [
-        'country_id', 'weather_risk', 'inflation_risk', 'currency_risk', 'political_risk', 'total_score', 'date'
+        'country_id', 'weather_risk', 'inflation_risk', 
+        'currency_risk', 'political_risk', 'total_score', 'date'
     ];
 
     protected $casts = [
