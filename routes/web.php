@@ -49,3 +49,4 @@ Route::get('/test-api', function () {
 // Route untuk auth (sementara belum dipakai, bisa dikomentari dulu)
 // Route::get('/login', function () { return view('home'); })->name('login');
 // Route::get('/logout', function () { return redirect('/'); })->name('logout');
+Route::get('/test-api', [App\Http\Controllers\Api\CountryController::class, 'index']);
