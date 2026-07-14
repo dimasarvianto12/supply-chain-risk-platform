@@ -44,4 +44,8 @@ return [
         'api_key' => env('EXCHANGE_RATE_API_KEY'),
     ],
 
+    'gnews' => [
+        'api_key' => env('GNEWS_API_KEY'),
+    ],
+
 ];
