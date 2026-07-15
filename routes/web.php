@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Country;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CountryPageController;
+use App\Http\Controllers\WeatherMapController;
+
 
 
 Route::get('/', function () {
@@ -67,3 +69,4 @@ Route::get('/compare', function () { return view('home'); })->name('compare.inde
 Route::get('/favorites', function () { return view('home'); })->name('favorites.index');
 Route::get('/countries', [CountryPageController::class, 'index'])->name('countries.index');
 Route::get('/api/country/{code}', [CountryPageController::class, 'detail'])->name('country.detail');
+Route::get('/weather-map', [WeatherMapController::class, 'index'])->name('weather.map');

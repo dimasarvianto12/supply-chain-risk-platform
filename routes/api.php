@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\RiskController;
 use App\Http\Controllers\Api\PortController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\CurrencyController;
+use App\Http\Controllers\Api\WeatherController;
+
 
 Route::get('/countries', [CountryController::class, 'index']);
 Route::get('/countries/{code}', [CountryController::class, 'show']);
@@ -21,3 +23,4 @@ Route::get('/news/{country}', [NewsController::class, 'show']);
 
 Route::get('/currency/{base}/{target}', [CurrencyController::class, 'show']);
 Route::get('/currency/history/{base}/{target}', [CurrencyController::class, 'history']);
+Route::get('/weather', [WeatherController::class, 'index']);
