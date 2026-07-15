@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Country;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CountryPageController;
 
 
 Route::get('/', function () {
@@ -64,3 +65,5 @@ Route::get('/ports', function () { return view('home'); })->name('ports.index');
 Route::get('/visualization', function () { return view('home'); })->name('visualization.index');
 Route::get('/compare', function () { return view('home'); })->name('compare.index');
 Route::get('/favorites', function () { return view('home'); })->name('favorites.index');
+Route::get('/countries', [CountryPageController::class, 'index'])->name('countries.index');
+Route::get('/api/country/{code}', [CountryPageController::class, 'detail'])->name('country.detail');
