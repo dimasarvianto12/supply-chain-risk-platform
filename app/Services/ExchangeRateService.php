@@ -9,10 +9,9 @@ class ExchangeRateService
 {
     protected $baseUrl = 'https://v6.exchangerate-api.com/v6';
 
-    public function getRate(string $base, string $target): ?float
+        public function getRate(string $base, string $target): ?float
     {
         $apiKey = config('services.exchange_rate.api_key');
-
         if (empty($apiKey)) {
             Log::error("ExchangeRate API key tidak ditemukan");
             return null;
@@ -20,7 +19,6 @@ class ExchangeRateService
 
         try {
             $url = "{$this->baseUrl}/{$apiKey}/pair/{$base}/{$target}";
-            
             $response = Http::withOptions(['verify' => false])->get($url);
 
             if (!$response->successful()) {
@@ -29,13 +27,7 @@ class ExchangeRateService
             }
 
             $data = $response->json();
-
-            if (isset($data['conversion_rate'])) {
-                return (float) $data['conversion_rate'];
-            }
-
-            return null;
-
+            return $data['conversion_rate'] ?? null;
         } catch (\Exception $e) {
             Log::error("ExchangeRate API error: " . $e->getMessage());
             return null;
