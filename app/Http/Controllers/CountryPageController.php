@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Country;
+use App\Models\Watchlist;
+use Illuminate\Support\Facades\Auth;
 
 class CountryPageController extends Controller
 {
@@ -27,6 +29,16 @@ class CountryPageController extends Controller
 
         if (!$country) {
             return response()->json(['error' => 'Country not found'], 404);
+        }
+
+        // ==========================================
+        // CEK STATUS FAVORIT
+        // ==========================================
+        $isFavorited = false;
+        if (Auth::check()) {
+            $isFavorited = Watchlist::where('user_id', Auth::id())
+                ->where('country_id', $country->id)
+                ->exists();
         }
 
         return response()->json([
@@ -61,6 +73,10 @@ class CountryPageController extends Controller
                 'currency' => $country->latestRiskScore->currency_risk,
                 'political' => $country->latestRiskScore->political_risk,
             ] : null,
+            // ==========================================
+            // TAMBAHKAN STATUS FAVORIT
+            // ==========================================
+            'is_favorited' => $isFavorited,
         ]);
     }
 }

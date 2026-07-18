@@ -10,7 +10,9 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PortPageController;
 use App\Http\Controllers\VisualizationController;
 use App\Http\Controllers\CompareController;
-
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\FavoriteController as ApiFavoriteController;
 
 
 
@@ -81,3 +83,16 @@ Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/ports', [PortPageController::class, 'index'])->name('ports.index');
 Route::get('/visualization', [VisualizationController::class, 'index'])->name('visualization.index');
 Route::get('/compare', [CompareController::class, 'index'])->name('compare.index');
+Route::get('/favorites', [FavoriteController::class, 'index'])
+    ->name('favorites.index')
+    ->middleware('auth');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::prefix('api')->middleware('auth')->group(function () {
+    Route::get('/favorites', [ApiFavoriteController::class, 'index']);
+    Route::post('/favorites/{country}', [ApiFavoriteController::class, 'store']);
+    Route::delete('/favorites/{country}', [ApiFavoriteController::class, 'destroy']);
+    Route::get('/favorites/check/{country}', [ApiFavoriteController::class, 'check']);
+});

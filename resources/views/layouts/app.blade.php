@@ -25,6 +25,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Menu kiri -->
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('countries.index') }}">Countries</a></li>
@@ -35,6 +36,31 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('visualization.index') }}">Visualization</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('compare.index') }}">Compare</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('favorites.index') }}">Favorites</a></li>
+                </ul>
+
+                <!-- Menu kanan (Login/Logout) -->
+                <ul class="navbar-nav">
+                    @auth
+                        <li class="nav-item">
+                            <span class="navbar-text me-2">
+                                <i class="fas fa-user"></i> {{ Auth::user()->name }}
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-link nav-link" style="display:inline; border:none; background:none; color:rgba(255,255,255,.55);">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>

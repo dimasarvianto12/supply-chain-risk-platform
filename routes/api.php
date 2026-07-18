@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\WeatherController;
 use App\Http\Controllers\Api\VisualizationController as ApiVisualizationController;
 use App\Http\Controllers\Api\CompareController as ApiCompareController;
+use App\Http\Controllers\Api\FavoriteController as ApiFavoriteController;
 
 
 

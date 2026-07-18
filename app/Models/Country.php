@@ -14,7 +14,10 @@ class Country extends Model
         'region', 'latitude', 'longitude'
     ];
 
-    // Relasi yang sudah ada
+    // ==========================================
+    // RELASI YANG SUDAH ADA
+    // ==========================================
+
     public function riskScores()
     {
         return $this->hasMany(RiskScore::class);
@@ -30,6 +33,7 @@ class Country extends Model
         return $this->hasMany(NewsCache::class);
     }
 
+    // One-to-many ke Watchlist (entri favorit per user)
     public function watchlists()
     {
         return $this->hasMany(Watchlist::class);
@@ -55,7 +59,6 @@ class Country extends Model
         return $this->hasOne(WeatherCache::class)->latest('recorded_at');
     }
 
-    // Relasi baru untuk kurs
     public function currencyRates()
     {
         return $this->hasMany(CurrencyRate::class)->latest('recorded_at');
@@ -64,5 +67,36 @@ class Country extends Model
     public function latestCurrencyRate()
     {
         return $this->hasOne(CurrencyRate::class)->latest('recorded_at');
+    }
+
+    // ==========================================
+    // RELASI BARU: MANY-TO-MANY KE USER
+    // ==========================================
+
+    /**
+     * Relasi many-to-many ke User melalui tabel watchlists
+     * Mendapatkan semua user yang memfavoritkan negara ini
+     */
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'watchlists')
+            ->withTimestamps() // otomatis mengisi created_at dan updated_at di pivot
+            ->orderBy('watchlists.created_at', 'desc');
+    }
+
+    /**
+     * Cek apakah negara ini difavoritkan oleh user tertentu
+     * 
+     * @param int|User $user
+     * @return bool
+     */
+    public function isFavoritedBy($user)
+    {
+        if ($user instanceof User) {
+            $userId = $user->id;
+        } else {
+            $userId = $user;
+        }
+        return $this->favoritedBy()->where('user_id', $userId)->exists();
     }
 }

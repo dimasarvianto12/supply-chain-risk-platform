@@ -135,14 +135,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // Cuaca
         const weather = data.weather || {};
 
+        // ==========================================
+        // STATUS FAVORIT
+        // ==========================================
+        const isFavorited = data.is_favorited || false;
+
+        // ==========================================
+        // RENDER HTML
+        // ==========================================
         detailContainer.innerHTML = `
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">
                         ${data.flag ? `<img src="${data.flag}" alt="${data.name}" style="height:30px; margin-right:10px;">` : ''}
                         ${data.name} (${data.code})
                         ${riskBadge}
                     </h3>
+                    <button id="favoriteBtn" class="btn ${isFavorited ? 'btn-danger' : 'btn-outline-danger'}">
+                        <i class="fas fa-star"></i>
+                        ${isFavorited ? ' Hapus dari Favorit' : ' Tambah ke Favorit'}
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -210,6 +222,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
+
+        // ==========================================
+        // EVENT LISTENER UNTUK TOMBOL FAVORIT
+        // ==========================================
+        document.getElementById('favoriteBtn')?.addEventListener('click', function() {
+            const countryCode = data.code;
+            toggleFavorite(countryCode, this);
+        });
+    }
+
+    // ==========================================
+    // FUNGSI TOGGLE FAVORIT
+    // ==========================================
+    function toggleFavorite(countryCode, btnElement) {
+        const isFavorited = btnElement.classList.contains('btn-danger');
+        const method = isFavorited ? 'DELETE' : 'POST';
+        const url = `/api/favorites/${countryCode}`;
+
+        // Disable button sementara
+        btnElement.disabled = true;
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.favorited === true) {
+                // Berhasil ditambahkan
+                btnElement.classList.remove('btn-outline-danger');
+                btnElement.classList.add('btn-danger');
+                btnElement.innerHTML = '<i class="fas fa-star"></i> Hapus dari Favorit';
+            } else if (data.favorited === false) {
+                // Berhasil dihapus
+                btnElement.classList.remove('btn-danger');
+                btnElement.classList.add('btn-outline-danger');
+                btnElement.innerHTML = '<i class="fas fa-star"></i> Tambah ke Favorit';
+            } else {
+                alert('Gagal mengubah status favorit. Silakan coba lagi.');
+            }
+            btnElement.disabled = false;
+        })
+        .catch(error => {
+            console.error('❌ Error:', error);
+            alert('Gagal mengubah status favorit. Silakan coba lagi.');
+            btnElement.disabled = false;
+        });
     }
 });
 </script>
