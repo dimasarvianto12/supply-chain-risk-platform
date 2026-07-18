@@ -7,6 +7,7 @@ use App\Http\Controllers\CountryPageController;
 use App\Http\Controllers\WeatherMapController;
 use App\Http\Controllers\CurrencyDashboardController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PortPageController;
 
 
 
@@ -76,3 +77,4 @@ Route::get('/api/country/{code}', [CountryPageController::class, 'detail'])->nam
 Route::get('/weather-map', [WeatherMapController::class, 'index'])->name('weather.map');
 Route::get('/currency', [CurrencyDashboardController::class, 'index'])->name('currency.dashboard');
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+Route::get('/ports', [PortPageController::class, 'index'])->name('ports.index');
