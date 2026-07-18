@@ -13,6 +13,10 @@ use App\Http\Controllers\CompareController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\FavoriteController as ApiFavoriteController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\PortController as AdminPortController;
+use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 
 
 
@@ -96,3 +100,18 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::delete('/favorites/{country}', [ApiFavoriteController::class, 'destroy']);
     Route::get('/favorites/check/{country}', [ApiFavoriteController::class, 'check']);
 });
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    Route::resource('users', AdminUserController::class);
+    Route::resource('ports', AdminPortController::class);
+    Route::resource('articles', AdminArticleController::class);
+});
+
+Route::get('/admin/debug', function () {
+    return [
+        'user' => auth()->user(),
+        'is_admin' => auth()->user()->is_admin ?? 'null',
+    ];
+})->middleware(['auth', 'admin']);
