@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\WeatherController;
 use App\Http\Controllers\Api\VisualizationController as ApiVisualizationController;
+use App\Http\Controllers\Api\CompareController as ApiCompareController;
+
 
 
 // Countries
@@ -38,3 +40,5 @@ Route::get('/visualization/gdp/{country}', [ApiVisualizationController::class, '
 Route::get('/visualization/inflation/{country}', [ApiVisualizationController::class, 'inflation']);
 Route::get('/visualization/currency/{country}', [ApiVisualizationController::class, 'currency']);
 Route::get('/visualization/risk/{country}', [ApiVisualizationController::class, 'risk']);
+
+Route::get('/compare/{countryA}/{countryB}', [ApiCompareController::class, 'compare']);
