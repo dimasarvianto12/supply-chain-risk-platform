@@ -38,7 +38,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('favorites.index') }}">Favorites</a></li>
                 </ul>
 
-                <!-- Menu kanan (Login/Logout) -->
+                <!-- Menu kanan (Login/Register/Logout + Admin) -->
                 <ul class="navbar-nav">
                     @auth
                         <li class="nav-item">
@@ -46,6 +46,13 @@
                                 <i class="fas fa-user"></i> {{ Auth::user()->name }}
                             </span>
                         </li>
+                        @if(Auth::user()->is_admin)
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt"></i> Admin
+                                </a>
+                            </li>
+                        @endif
                         <li class="nav-item">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
@@ -58,6 +65,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('login') }}">
                                 <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">
+                                <i class="fas fa-user-plus"></i> Daftar
                             </a>
                         </li>
                     @endauth

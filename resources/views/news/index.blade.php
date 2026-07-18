@@ -67,6 +67,13 @@
         margin-bottom: 15px;
         color: #dee2e6;
     }
+    .internal-article {
+        border-left: 4px solid #17a2b8;
+        background-color: #f8f9fa;
+    }
+    .internal-article .news-title {
+        color: #138496;
+    }
 </style>
 @endsection
 
@@ -115,6 +122,34 @@
         </div>
     </div>
 </div>
+
+<!-- ========================================== -->
+<!-- ARTIKEL INTERNAL (dari database admin)      -->
+<!-- ========================================== -->
+@if(isset($internalArticles) && $internalArticles->count() > 0)
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-pen-fancy"></i> Artikel Internal
+                <span class="badge bg-light text-dark ms-2">{{ $internalArticles->count() }} artikel</span>
+            </div>
+            <div class="card-body">
+                @foreach($internalArticles as $article)
+                    <div class="border-bottom pb-3 mb-3 last:border-0 last:mb-0">
+                        <h5 class="news-title">{{ $article->title }}</h5>
+                        <p>{{ \Illuminate\Support\Str::limit($article->content, 200) }}</p>
+                        <div class="news-meta">
+                            <i class="fas fa-user"></i> {{ $article->author ?? 'Admin' }} &bull;
+                            <i class="fas fa-clock"></i> {{ $article->created_at->format('d M Y, H:i') }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- News List -->
 <div class="row">

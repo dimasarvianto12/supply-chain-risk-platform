@@ -14,7 +14,6 @@ class AdminMiddleware
             return redirect()->route('login');
         }
 
-        // Debug: cek is_admin
         if (Auth::user()->is_admin != 1) {
             abort(403, 'Akses ditolak. Anda bukan admin.');
         }
