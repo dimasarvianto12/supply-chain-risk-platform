@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\PortController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\WeatherController;
+use App\Http\Controllers\Api\VisualizationController as ApiVisualizationController;
+
 
 // Countries
 Route::get('/countries', [CountryController::class, 'index']);
@@ -31,3 +33,8 @@ Route::get('/currency/{base}/{target}', [CurrencyController::class, 'show']);
 
 // Weather
 Route::get('/weather', [WeatherController::class, 'index']);
+
+Route::get('/visualization/gdp/{country}', [ApiVisualizationController::class, 'gdp']);
+Route::get('/visualization/inflation/{country}', [ApiVisualizationController::class, 'inflation']);
+Route::get('/visualization/currency/{country}', [ApiVisualizationController::class, 'currency']);
+Route::get('/visualization/risk/{country}', [ApiVisualizationController::class, 'risk']);

@@ -8,6 +8,7 @@ use App\Http\Controllers\WeatherMapController;
 use App\Http\Controllers\CurrencyDashboardController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PortPageController;
+use App\Http\Controllers\VisualizationController;
 
 
 
@@ -78,3 +79,4 @@ Route::get('/weather-map', [WeatherMapController::class, 'index'])->name('weathe
 Route::get('/currency', [CurrencyDashboardController::class, 'index'])->name('currency.dashboard');
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/ports', [PortPageController::class, 'index'])->name('ports.index');
+Route::get('/visualization', [VisualizationController::class, 'index'])->name('visualization.index');
