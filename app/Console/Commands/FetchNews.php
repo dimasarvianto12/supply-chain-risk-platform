@@ -6,18 +6,21 @@ use Illuminate\Console\Command;
 use App\Models\Country;
 use App\Models\NewsCache;
 use App\Services\GNewsService;
+use App\Services\SentimentAnalyzer;
 
 class FetchNews extends Command
 {
     protected $signature = 'app:fetch-news {country? : Kode negara (opsional)}';
-    protected $description = 'Ambil berita dari GNews API untuk semua negara atau satu negara tertentu';
+    protected $description = 'Ambil berita dari GNews API untuk semua negara atau satu negara tertentu, dan langsung analisis sentimen';
 
     protected $gnewsService;
+    protected $sentimentAnalyzer;
 
-    public function __construct(GNewsService $gnewsService)
+    public function __construct(GNewsService $gnewsService, SentimentAnalyzer $sentimentAnalyzer)
     {
         parent::__construct();
         $this->gnewsService = $gnewsService;
+        $this->sentimentAnalyzer = $sentimentAnalyzer;
     }
 
     public function handle()
@@ -31,7 +34,7 @@ class FetchNews extends Command
         }
 
         if ($countries->isEmpty()) {
-            $this->error('Negara tidak ditemukan.');
+            $this->error('❌ Negara tidak ditemukan.');
             return 1;
         }
 
@@ -44,7 +47,7 @@ class FetchNews extends Command
             $articles = $this->gnewsService->getCountryNews($country->name);
 
             if ($articles === null) {
-                $this->warn("  ⚠️ Gagal mengambil berita.");
+                $this->warn("  ⚠️ Gagal mengambil berita (API error).");
                 $bar->advance();
                 continue;
             }
@@ -63,26 +66,30 @@ class FetchNews extends Command
                     ->exists();
 
                 if (!$exists) {
+                    // Analisis sentimen
+                    $text = ($article['title'] ?? '') . ' ' . ($article['description'] ?? '');
+                    $sentimentResult = $this->sentimentAnalyzer->analyze($text);
+
                     NewsCache::create([
                         'country_id' => $country->id,
                         'title' => $article['title'],
                         'description' => $article['description'],
                         'url' => $article['url'],
                         'published_at' => $article['published_at'],
-                        'sentiment' => null, // akan diisi di Tahap 6
+                        'sentiment' => $sentimentResult['sentiment'], // positive, neutral, negative
                     ]);
                     $count++;
                 }
             }
 
-            $this->info("  ✅ {$count} berita baru disimpan.");
+            $this->info("  ✅ {$count} berita baru disimpan (dengan sentimen).");
 
             $bar->advance();
         }
 
         $bar->finish();
         $this->newLine();
-        $this->info('✅ Selesai mengambil berita.');
+        $this->info('✅ Selesai mengambil dan menganalisis berita.');
         return 0;
     }
 }

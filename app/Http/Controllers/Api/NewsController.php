@@ -11,8 +11,46 @@ use Illuminate\Http\Request;
 class NewsController extends Controller
 {
     /**
+     * GET /api/news
+     * Berita global dengan filter kata kunci, negara, dan sentimen
+     */
+    public function index(Request $request)
+    {
+        $query = NewsCache::with('country');
+
+        // Filter berdasarkan negara (kode negara)
+        if ($request->has('country') && $request->country) {
+            $country = Country::where('code', $request->country)->first();
+            if ($country) {
+                $query->where('country_id', $country->id);
+            }
+        }
+
+        // Filter berdasarkan kata kunci (judul atau deskripsi)
+        if ($request->has('keyword') && $request->keyword) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', '%' . $keyword . '%')
+                  ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        // Filter berdasarkan sentimen
+        if ($request->has('sentiment') && $request->sentiment) {
+            $sentiment = strtolower($request->sentiment);
+            $query->where('sentiment', $sentiment);
+        }
+
+        // Pagination (10 item per halaman)
+        $perPage = $request->get('per_page', 10);
+        $news = $query->orderBy('published_at', 'desc')->paginate($perPage);
+
+        return NewsResource::collection($news);
+    }
+
+    /**
      * GET /api/news/{country}
-     * Berita untuk suatu negara (dengan sentimen)
+     * Berita untuk satu negara tertentu (dengan sentimen)
      */
     public function show($countryCode, Request $request)
     {
@@ -29,32 +67,6 @@ class NewsController extends Controller
             ->orderBy('published_at', 'desc')
             ->limit($limit)
             ->get();
-
-        return NewsResource::collection($news);
-    }
-
-    /**
-     * GET /api/news
-     * (Opsional) Berita global dengan filter kata kunci
-     */
-    public function index(Request $request)
-    {
-        $query = NewsCache::with('country');
-
-        if ($request->has('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', '%' . $keyword . '%')
-                  ->orWhere('description', 'like', '%' . $keyword . '%');
-            });
-        }
-
-        if ($request->has('sentiment')) {
-            $query->where('sentiment', $request->sentiment);
-        }
-
-        $limit = $request->get('limit', 30);
-        $news = $query->orderBy('published_at', 'desc')->limit($limit)->get();
 
         return NewsResource::collection($news);
     }
