@@ -10,6 +10,6 @@ class Port extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'country', 'latitude', 'longitude', 'status'
+        'name', 'country', 'latitude', 'longitude', 'status', 'congestion_level', 'delay_days'
     ];
 }

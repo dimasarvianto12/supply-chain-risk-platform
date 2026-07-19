@@ -2,74 +2,111 @@
 
 @section('title', 'Favorite Monitoring List')
 
-@section('styles')
+@push('styles')
 <style>
     .favorite-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        padding: 20px;
-        margin-bottom: 20px;
-        transition: transform 0.2s;
+        background: #ffffff;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        border: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
     }
     .favorite-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        border-color: #cbd5e1;
     }
     .favorite-card .flag-img {
-        height: 30px;
-        width: auto;
+        height: 28px !important;
+        width: auto !important;
+        border-radius: 4px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        vertical-align: middle;
         margin-right: 10px;
+        display: inline-block;
     }
     .favorite-card .country-name {
-        font-weight: 600;
-        font-size: 1.1rem;
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #0f172a;
+        vertical-align: middle;
     }
     .favorite-card .country-code {
-        color: #6c757d;
+        color: #64748b;
         font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 4px;
     }
     .favorite-card .stat-item {
         text-align: center;
-        padding: 8px 12px;
-        background: #f8f9fa;
-        border-radius: 6px;
-        margin: 0 5px;
+        padding: 10px 8px;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+        height: 100%;
+        transition: all 0.2s ease;
+    }
+    .favorite-card .stat-item:hover {
+        background: #f1f5f9;
     }
     .favorite-card .stat-item .stat-value {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 1.05rem;
+        color: #1e293b;
+        margin-bottom: 2px;
     }
     .favorite-card .stat-item .stat-label {
         font-size: 0.75rem;
-        color: #6c757d;
+        font-weight: 600;
+        color: #64748b;
     }
     .remove-btn {
-        color: #dc3545;
-        background: none;
-        border: none;
+        color: #ef4444;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
         cursor: pointer;
-        transition: transform 0.2s;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
     }
     .remove-btn:hover {
-        transform: scale(1.2);
+        background: #ef4444;
+        color: #ffffff;
+        transform: scale(1.05);
     }
+    
+    /* Risk colored borders */
+    .favorite-card.border-low { border-left: 4px solid #10b981 !important; }
+    .favorite-card.border-medium { border-left: 4px solid #f59e0b !important; }
+    .favorite-card.border-high { border-left: 4px solid #ef4444 !important; }
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
-        color: #6c757d;
+        color: #64748b;
     }
     .empty-state i {
-        font-size: 4rem;
-        color: #dee2e6;
-        margin-bottom: 20px;
+        font-size: 3.5rem;
+        color: #cbd5e1;
+        margin-bottom: 16px;
     }
     .loading-spinner {
         display: inline-block;
         width: 1.5rem;
         height: 1.5rem;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #3498db;
+        border: 3px solid #e2e8f0;
+        border-top: 3px solid #6366f1;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin-right: 8px;
@@ -79,21 +116,24 @@
         100% { transform: rotate(360deg); }
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
-<div class="row">
+<!-- Header Section -->
+<div class="row mb-4">
     <div class="col-12">
-        <h1><i class="fas fa-star"></i> Favorite Monitoring List</h1>
-        <p>Daftar negara yang Anda pantau secara rutin.</p>
+        <h1 class="fw-extrabold text-dark tracking-tight mb-1" style="font-size: 2.25rem;">
+            <i class="fas fa-star text-warning"></i> Favorite Monitoring List
+        </h1>
+        <p class="text-muted fs-5 mb-0">Daftar negara yang Anda pantau secara rutin dalam pemantauan logistik global.</p>
         <hr>
     </div>
 </div>
 
 <div id="favoritesContainer">
-    <div class="text-center py-5">
+    <div class="card premium-card py-5 text-center text-muted">
         <div class="loading-spinner"></div>
-        <p class="mt-2">Memuat daftar favorit...</p>
+        <p class="mt-2 mb-0">Memuat daftar negara favorit Anda...</p>
     </div>
 </div>
 @endsection
@@ -111,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
-            // Cek status HTTP
             if (response.status === 401) {
                 throw new Error('Silakan login terlebih dahulu.');
             }
@@ -119,10 +158,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(`HTTP error ${response.status}`);
             }
 
-            // Periksa apakah response berupa JSON
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                // Jika bukan JSON, kemungkinan redirect ke HTML (login)
                 throw new Error('Sesi mungkin telah berakhir. Silakan <a href="/login">login</a> kembali.');
             }
 
@@ -133,12 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('❌ Error:', error);
-            // Tampilkan pesan error dengan link login jika perlu
             container.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    ${error.message}
-                    ${error.message.includes('login') ? '' : '<br><small>Silakan <a href="/login">login</a> untuk melihat favorit.</small>'}
+                <div class="card premium-card py-5 text-center text-danger">
+                    <i class="fas fa-exclamation-circle text-danger mb-2" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold">Gagal memuat favorit</h5>
+                    <p class="text-muted mb-0">${error.message}</p>
                 </div>
             `;
         });
@@ -147,57 +183,72 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderFavorites(favorites) {
         if (!favorites || favorites.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-star"></i>
-                    <h5>Belum ada negara favorit</h5>
-                    <p class="text-muted">Kunjungi halaman <a href="{{ route('countries.index') }}">Country Dashboard</a>
-                    dan tambahkan negara ke favorit.</p>
+                <div class="card premium-card py-5">
+                    <div class="empty-state">
+                        <i class="fas fa-star"></i>
+                        <h5 class="fw-bold">Belum ada negara favorit</h5>
+                        <p class="text-muted mb-0">Kunjungi halaman <a href="{{ route('countries.index') }}" class="text-primary fw-bold text-decoration-none">Country Dashboard</a> dan tambahkan negara yang dipantau.</p>
+                    </div>
                 </div>
             `;
             return;
         }
 
-        let html = '<div class="row">';
+        let html = '<div class="row g-4">';
         favorites.forEach(country => {
-            const temp = country.weather?.temperature ?? 'N/A';
-            const risk = country.risk?.total ?? 'N/A';
-            const added = country.added_at ? new Date(country.added_at).toLocaleDateString('id-ID') : 'N/A';
+            const temp = country.weather?.temperature !== undefined && country.weather?.temperature !== null ? parseFloat(country.weather.temperature).toFixed(1) : 'N/A';
+            const risk = country.risk?.total !== undefined && country.risk?.total !== null ? parseFloat(country.risk.total).toFixed(1) : 0;
+            const added = country.added_at ? new Date(country.added_at).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            }) : 'N/A';
+
+            // Calculate dynamic risk border classes
+            let borderClass = 'border-low';
+            if (risk > 70) {
+                borderClass = 'border-high';
+            } else if (risk > 30) {
+                borderClass = 'border-medium';
+            }
 
             html += `
                 <div class="col-md-6 col-lg-4">
-                    <div class="favorite-card" data-code="${country.code}">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                ${country.flag ? `<img src="${country.flag}" class="flag-img">` : ''}
-                                <span class="country-name">${country.name}</span>
-                                <span class="country-code">(${country.code})</span>
+                    <div class="card favorite-card ${borderClass} p-4" data-code="${country.code}">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                ${country.flag ? `<img src="${country.flag}" class="flag-img" alt="${country.name}">` : ''}
+                                <div>
+                                    <span class="country-name">${country.name}</span>
+                                    <span class="country-code">(${country.code})</span>
+                                </div>
                             </div>
-                            <button class="remove-btn" onclick="removeFavorite('${country.code}')">
-                                <i class="fas fa-trash"></i>
+                            <button class="remove-btn" onclick="removeFavorite('${country.code}')" title="Hapus dari Pemantauan">
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
-                        <div class="row mt-3">
+                        
+                        <div class="row g-2 mb-3">
                             <div class="col-4">
                                 <div class="stat-item">
-                                    <div class="stat-value">${temp}°C</div>
-                                    <div class="stat-label">Suhu</div>
+                                    <div class="stat-value text-info"><i class="fas fa-temperature-half me-1"></i>${temp}°</div>
+                                    <div class="stat-label">SUHU</div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="stat-item">
-                                    <div class="stat-value">${risk}%</div>
-                                    <div class="stat-label">Risiko</div>
+                                    <div class="stat-value text-warning"><i class="fas fa-triangle-exclamation me-1"></i>${risk}%</div>
+                                    <div class="stat-label">RISIKO</div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="stat-item">
-                                    <div class="stat-value">${country.currency || 'N/A'}</div>
-                                    <div class="stat-label">Mata Uang</div>
+                                    <div class="stat-value text-success"><i class="fas fa-coins me-1"></i>${country.currency || 'N/A'}</div>
+                                    <div class="stat-label">KURS</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-2 text-muted small">
-                            <i class="fas fa-clock"></i> Ditambahkan: ${added}
+                        
+                        <div class="text-muted small mt-auto" style="font-size:0.8rem;">
+                            <i class="far fa-calendar-alt me-1"></i> Ditambahkan: <strong>${added}</strong>
                         </div>
                     </div>
                 </div>
@@ -207,9 +258,8 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = html;
     }
 
-    // Fungsi global untuk remove favorite (dipanggil dari onclick)
     window.removeFavorite = function(countryCode) {
-        if (!confirm(`Hapus negara ini dari favorit?`)) return;
+        if (!confirm(`Hapus negara ini dari daftar pemantauan favorit?`)) return;
 
         fetch(`/api/favorites/${countryCode}`, {
             method: 'DELETE',
@@ -220,22 +270,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
             return response.json();
         })
         .then(data => {
             if (data.favorited === false) {
-                // Hapus card dari DOM
                 const card = document.querySelector(`.favorite-card[data-code="${countryCode}"]`);
                 if (card) {
                     const parentCol = card.closest('.col-md-6.col-lg-4');
-                    if (parentCol) parentCol.remove();
-                }
-                // Jika tidak ada card tersisa, reload data
-                if (document.querySelectorAll('.favorite-card').length === 0) {
-                    loadFavorites();
+                    if (parentCol) {
+                        parentCol.style.opacity = 0;
+                        parentCol.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            parentCol.remove();
+                            if (document.querySelectorAll('.favorite-card').length === 0) {
+                                loadFavorites();
+                            }
+                        }, 300);
+                    }
                 }
             }
         })
@@ -245,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    // Muat data saat halaman siap
     loadFavorites();
 });
 </script>

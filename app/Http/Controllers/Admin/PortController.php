@@ -27,6 +27,8 @@ class PortController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'status' => 'required|in:active,inactive',
+            'congestion_level' => 'nullable|in:low,medium,high',
+            'delay_days' => 'nullable|integer|min:0',
         ]);
 
         Port::create($request->all());
@@ -50,6 +52,8 @@ class PortController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'status' => 'required|in:active,inactive',
+            'congestion_level' => 'nullable|in:low,medium,high',
+            'delay_days' => 'nullable|integer|min:0',
         ]);
 
         $port->update($request->all());

@@ -2,32 +2,42 @@
 
 @section('title', 'Currency Impact Dashboard')
 
-@section('styles')
+@push('styles')
 <style>
-    .currency-card {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
     .rate-table th {
-        background-color: #343a40;
-        color: white;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 16px 20px;
     }
-    .rate-table tr:hover {
-        background-color: #e9ecef;
+    .rate-table td {
+        padding: 16px 20px;
+        font-size: 0.95rem;
+        color: #334155;
+        vertical-align: middle;
+    }
+    .rate-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .rate-table tbody tr:hover {
+        background-color: #f8fafc;
     }
     .chart-container {
         position: relative;
-        height: 300px;
+        height: 320px;
         width: 100%;
     }
     .loading-spinner {
         display: inline-block;
-        width: 1rem;
-        height: 1rem;
-        border: 2px solid #f3f3f3;
-        border-top: 2px solid #3498db;
+        width: 1.2rem;
+        height: 1.2rem;
+        border: 2.5px solid #e2e8f0;
+        border-top: 2.5px solid #8b5cf6;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin-right: 8px;
@@ -36,74 +46,99 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+    .currency-badge {
+        background: #e0e7ff;
+        color: #4f46e5;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 8px;
+    }
+    .rate-value {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #0f172a;
+    }
 </style>
-@endsection
+@endpush
 
 @section('content')
-<div class="row">
+<!-- Header Section -->
+<div class="row mb-4">
     <div class="col-12">
-        <h1><i class="fas fa-money-bill-wave"></i> Currency Impact Dashboard</h1>
-        <p>Pantau nilai tukar mata uang dan pergerakannya.</p>
+        <h1 class="fw-extrabold text-dark tracking-tight mb-1" style="font-size: 2.25rem;">
+            <i class="fas fa-money-bill-wave text-success"></i> Currency Impact Dashboard
+        </h1>
+        <p class="text-muted fs-5 mb-0">Pantau nilai tukar mata uang global dan pergerakan tren terkininya.</p>
         <hr>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-filter"></i> Filter
+<div class="row g-4">
+    <!-- Filter Card -->
+    <div class="col-lg-4">
+        <div class="card premium-card h-100">
+            <div class="premium-card-header">
+                <i class="fas fa-filter text-primary"></i>
+                <span>Filter Kurs</span>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="baseCurrency" class="form-label">Base Currency</label>
-                    <select id="baseCurrency" class="form-select">
-                        @foreach($baseCurrencies as $base)
-                            <option value="{{ $base }}" {{ $base == 'USD' ? 'selected' : '' }}>{{ $base }}</option>
-                        @endforeach
-                    </select>
+            <div class="premium-card-body d-flex flex-column justify-content-between" style="min-height: 280px;">
+                <div>
+                    <div class="mb-3">
+                        <label for="baseCurrency" class="form-label fw-bold text-secondary" style="font-size: 0.85rem;">BASE CURRENCY</label>
+                        <select id="baseCurrency" class="form-select py-2 rounded-3" style="border-color: #cbd5e1; box-shadow: none;">
+                            @foreach($baseCurrencies as $base)
+                                <option value="{{ $base }}" {{ $base == 'USD' ? 'selected' : '' }}>{{ $base }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="targetCurrency" class="form-label fw-bold text-secondary" style="font-size: 0.85rem;">TARGET CURRENCY</label>
+                        <select id="targetCurrency" class="form-select py-2 rounded-3" style="border-color: #cbd5e1; box-shadow: none;">
+                            <option value="">-- Pilih Mata Uang --</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country->currency }}" data-code="{{ $country->code }}">
+                                    {{ $country->name }} ({{ $country->currency }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="targetCurrency" class="form-label">Target Currency</label>
-                    <select id="targetCurrency" class="form-select">
-                        <option value="">-- Pilih Mata Uang --</option>
-                        @foreach($countries as $country)
-                            <option value="{{ $country->currency }}" data-code="{{ $country->code }}">
-                                {{ $country->name }} ({{ $country->currency }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <button id="refreshBtn" class="btn btn-primary w-100">
-                    <i class="fas fa-sync-alt"></i> Refresh Data
+                <button id="refreshBtn" class="btn btn-primary w-100 py-2.5 rounded-pill fw-bold">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh Data
                 </button>
             </div>
         </div>
     </div>
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-chart-line"></i> Grafik Pergerakan Kurs (7 Hari Terakhir)
+
+    <!-- Chart Card -->
+    <div class="col-lg-8">
+        <div class="card premium-card h-100">
+            <div class="premium-card-header">
+                <i class="fas fa-chart-line text-primary"></i>
+                <span>Grafik Pergerakan Kurs (7 Hari Terakhir)</span>
             </div>
-            <div class="card-body">
+            <div class="premium-card-body d-flex flex-column justify-content-center">
                 <div class="chart-container">
                     <canvas id="currencyChart"></canvas>
                 </div>
-                <div id="chartMessage" class="text-center text-muted mt-2"></div>
+                <div id="chartMessage" class="text-center text-muted mt-2 fw-semibold" style="font-size: 0.9rem;"></div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Table Card -->
 <div class="row mt-4">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-table"></i> Daftar Kurs Terkini
+        <div class="card premium-card">
+            <div class="premium-card-header">
+                <i class="fas fa-table text-primary"></i>
+                <span>Daftar Kurs Terkini</span>
             </div>
-            <div class="card-body">
+            <div class="premium-card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped rate-table" id="rateTable">
+                    <table class="table rate-table mb-0" id="rateTable">
                         <thead>
                             <tr>
                                 <th>Negara</th>
@@ -114,9 +149,11 @@
                             </tr>
                         </thead>
                         <tbody id="rateTableBody">
-                            <tr><td colspan="5" class="text-center">
-                                <span class="loading-spinner"></span> Memuat data...
-                            </td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <span class="loading-spinner"></span> Menghubungi database kurs...
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -129,7 +166,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Elemen
     const baseSelect = document.getElementById('baseCurrency');
     const targetSelect = document.getElementById('targetCurrency');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -138,50 +174,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const chartMessage = document.getElementById('chartMessage');
     let chart = null;
 
-    // ==========================================
-    // Fungsi untuk load data kurs terbaru
-    // ==========================================
+    // Load rates table
     function loadRates(base) {
-        console.log('📥 Memuat kurs untuk base:', base);
-        
-        // Tampilkan loading
-        tableBody.innerHTML = `<tr><td colspan="5" class="text-center">
-            <span class="loading-spinner"></span> Memuat data...
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted">
+            <span class="loading-spinner"></span> Memuat data kurs terbaru...
         </td></tr>`;
 
         fetch(`/api/currency/latest/${base}`)
             .then(response => {
-                console.log('📡 Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Data kurs (raw):', data);
-
-                // Jika response berupa object dengan properti 'data', ambil array-nya
                 let rates = data;
                 if (data && typeof data === 'object' && !Array.isArray(data)) {
                     if (data.data && Array.isArray(data.data)) {
                         rates = data.data;
                     } else if (data.message) {
-                        // Jika ada pesan, tampilkan
-                        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-warning">${data.message}</td></tr>`;
+                        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-warning">${data.message}</td></tr>`;
                         return;
                     }
                 }
 
-                // Pastikan rates adalah array
-                if (!Array.isArray(rates)) {
-                    rates = [];
-                }
+                if (!Array.isArray(rates)) rates = [];
 
                 if (rates.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">
-                        <i class="fas fa-info-circle"></i> 
-                        Tidak ada data kurs. 
-                        <br><small>Jalankan <code>php artisan app:fetch-rates USD</code> di terminal.</small>
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted">
+                        <i class="fas fa-info-circle me-2"></i> Belum ada data kurs. Silakan jalankan seeder atau penarik kurs.
                     </td></tr>`;
                     return;
                 }
@@ -189,54 +208,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 let rows = '';
                 rates.forEach(item => {
                     const rate = parseFloat(item.rate) || 0;
+                    const date = item.recorded_at ? item.recorded_at.substring(0, 16) : 'N/A';
                     rows += `
                         <tr>
-                            <td>${item.country || 'N/A'}</td>
-                            <td>${item.code || 'N/A'}</td>
-                            <td>${item.currency || 'N/A'}</td>
-                            <td>${rate.toFixed(4)}</td>
-                            <td>${item.recorded_at || 'N/A'}</td>
+                            <td class="fw-bold text-dark">${item.country || 'N/A'}</td>
+                            <td><span class="badge bg-light text-secondary border px-2 py-1.5 rounded">${item.code || 'N/A'}</span></td>
+                            <td><span class="currency-badge">${item.currency || 'N/A'}</span></td>
+                            <td class="rate-value">${rate.toFixed(4)}</td>
+                            <td><span class="text-muted"><i class="far fa-clock me-1"></i> ${date}</span></td>
                         </tr>
                     `;
                 });
                 tableBody.innerHTML = rows;
-                console.log(`✅ ${rates.length} kurs berhasil dimuat.`);
             })
             .catch(error => {
                 console.error('❌ Error loading rates:', error);
-                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">
-                    <i class="fas fa-exclamation-circle"></i> 
-                    Gagal memuat data: ${error.message}
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i> Gagal memuat data kurs: ${error.message}
                 </td></tr>`;
             });
     }
 
-    // ==========================================
-    // Fungsi untuk load history dan render chart
-    // ==========================================
+    // Load history and render premium chart
     function loadHistory(base, target) {
-        // Clear chart jika tidak ada target
         if (!target) {
             if (chart) { chart.destroy(); chart = null; }
-            chartMessage.textContent = 'Silakan pilih target currency untuk melihat grafik.';
+            chartCanvas.style.display = 'none';
+            chartMessage.style.display = 'block';
+            chartMessage.textContent = 'Silakan pilih target currency untuk melihat grafik tren pergerakan.';
             return;
         }
 
-        chartMessage.textContent = 'Memuat grafik...';
+        chartCanvas.style.display = 'block';
+        chartMessage.style.display = 'none';
 
         fetch(`/api/currency/history/${base}/${target}?days=7`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
                 return response.json();
             })
             .then(data => {
-                console.log('📊 History data:', data);
-
-                // Jika tidak ada history
                 if (!data.history || data.history.length === 0) {
                     if (chart) { chart.destroy(); chart = null; }
+                    chartCanvas.style.display = 'none';
+                    chartMessage.style.display = 'block';
                     chartMessage.textContent = 'Belum ada data history untuk pasangan mata uang ini.';
                     return;
                 }
@@ -244,13 +259,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const labels = data.history.map(h => h.date);
                 const rates = data.history.map(h => parseFloat(h.rate) || 0);
 
-                // Hapus chart lama jika ada
                 if (chart) {
                     chart.destroy();
                     chart = null;
                 }
 
                 const ctx = chartCanvas.getContext('2d');
+                
+                // Buat gradient ungu-biru yang menakjubkan
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(139, 92, 246, 0.4)');
+                gradient.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+
                 chart = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -258,12 +278,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         datasets: [{
                             label: `1 ${base} = ${target}`,
                             data: rates,
-                            borderColor: '#007bff',
-                            backgroundColor: 'rgba(0,123,255,0.1)',
+                            borderColor: '#8b5cf6', // purple line
+                            borderWidth: 3,
+                            backgroundColor: gradient,
                             fill: true,
-                            tension: 0.3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#007bff',
+                            tension: 0.35,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: '#8b5cf6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
                         }]
                     },
                     options: {
@@ -271,20 +295,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'top',
+                                display: true,
+                                labels: {
+                                    font: {
+                                        family: 'Plus Jakarta Sans',
+                                        weight: '600'
+                                    }
+                                }
                             },
                             tooltip: {
+                                padding: 12,
+                                titleFont: { family: 'Plus Jakarta Sans', weight: '700' },
+                                bodyFont: { family: 'Plus Jakarta Sans' },
                                 callbacks: {
                                     label: function(context) {
-                                        return `${context.dataset.label}: ${context.parsed.y.toFixed(4)}`;
+                                        return ` Nilai Tukar: ${context.parsed.y.toFixed(4)}`;
                                     }
                                 }
                             }
                         },
                         scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { family: 'Plus Jakarta Sans' } }
+                            },
                             y: {
+                                grid: { color: '#f1f5f9' },
                                 beginAtZero: false,
                                 ticks: {
+                                    font: { family: 'Plus Jakarta Sans' },
                                     callback: function(value) {
                                         return value.toFixed(4);
                                     }
@@ -293,38 +332,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 });
-
-                chartMessage.textContent = '';
-                console.log('✅ Chart berhasil dirender.');
             })
             .catch(error => {
                 console.error('❌ Error loading history:', error);
                 if (chart) { chart.destroy(); chart = null; }
+                chartCanvas.style.display = 'none';
+                chartMessage.style.display = 'block';
                 chartMessage.textContent = 'Gagal memuat grafik: ' + error.message;
             });
     }
 
-    // ==========================================
-    // Fungsi refresh semua data
-    // ==========================================
     function refreshAll() {
         const base = baseSelect.value;
         const target = targetSelect.value;
-        console.log(`🔄 Refresh: base=${base}, target=${target}`);
         loadRates(base);
         loadHistory(base, target);
     }
 
-    // ==========================================
-    // Event listeners
-    // ==========================================
     baseSelect.addEventListener('change', refreshAll);
     targetSelect.addEventListener('change', refreshAll);
     refreshBtn.addEventListener('click', refreshAll);
 
-    // ==========================================
-    // Inisialisasi pertama
-    // ==========================================
     refreshAll();
 });
 </script>

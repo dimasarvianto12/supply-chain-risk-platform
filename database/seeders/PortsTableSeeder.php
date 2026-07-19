@@ -58,15 +58,74 @@ class PortsTableSeeder extends Seeder
             // South Africa
             ['name' => 'Port of Durban', 'country' => 'South Africa', 'latitude' => -29.8587, 'longitude' => 31.0218, 'status' => 'active'],
             ['name' => 'Port of Cape Town', 'country' => 'South Africa', 'latitude' => -33.9249, 'longitude' => 18.4241, 'status' => 'active'],
+            
+            // France
+            ['name' => 'Port of Marseille', 'country' => 'France', 'latitude' => 43.2965, 'longitude' => 5.3698, 'status' => 'active'],
+            ['name' => 'Port of Le Havre', 'country' => 'France', 'latitude' => 49.4944, 'longitude' => 0.1079, 'status' => 'active'],
+            
+            // Canada
+            ['name' => 'Port of Vancouver', 'country' => 'Canada', 'latitude' => 49.2827, 'longitude' => -123.1207, 'status' => 'active'],
+            ['name' => 'Port of Montreal', 'country' => 'Canada', 'latitude' => 45.5017, 'longitude' => -73.5673, 'status' => 'active'],
+            
+            // Italy
+            ['name' => 'Port of Genoa', 'country' => 'Italy', 'latitude' => 44.4056, 'longitude' => 8.9463, 'status' => 'active'],
+            ['name' => 'Port of Naples', 'country' => 'Italy', 'latitude' => 40.8518, 'longitude' => 14.2681, 'status' => 'active'],
+            
+            // South Korea
+            ['name' => 'Port of Busan', 'country' => 'South Korea', 'latitude' => 35.1017, 'longitude' => 129.0300, 'status' => 'active'],
+            ['name' => 'Port of Incheon', 'country' => 'South Korea', 'latitude' => 37.4563, 'longitude' => 126.7052, 'status' => 'active'],
+            
+            // Mexico
+            ['name' => 'Port of Veracruz', 'country' => 'Mexico', 'latitude' => 19.2003, 'longitude' => -96.1328, 'status' => 'active'],
+            ['name' => 'Port of Manzanillo', 'country' => 'Mexico', 'latitude' => 19.0664, 'longitude' => -104.3160, 'status' => 'active'],
         ];
 
+        $levels = ['low', 'medium', 'high'];
+
         foreach ($ports as $port) {
+            $congestion = $levels[array_rand($levels)];
+            $delay = 0;
+            if ($congestion === 'medium') {
+                $delay = rand(1, 3);
+            } elseif ($congestion === 'high') {
+                $delay = rand(4, 10);
+            }
+
+            $port['congestion_level'] = $congestion;
+            $port['delay_days'] = $delay;
+
             Port::updateOrCreate(
                 ['name' => $port['name']],
                 $port
             );
         }
 
-        $this->command->info('✅ Data pelabuhan berhasil di-seed!');
+        // Generate generic ports for ALL countries that don't have one yet
+        $allCountries = \App\Models\Country::all();
+        foreach ($allCountries as $countryModel) {
+            $existingPort = Port::where('country', $countryModel->name)->first();
+            
+            if (!$existingPort) {
+                $congestion = $levels[array_rand($levels)];
+                $delay = 0;
+                if ($congestion === 'medium') {
+                    $delay = rand(1, 3);
+                } elseif ($congestion === 'high') {
+                    $delay = rand(4, 10);
+                }
+
+                Port::create([
+                    'name' => 'Port of ' . $countryModel->name,
+                    'country' => $countryModel->name,
+                    'latitude' => $countryModel->latitude ?? 0,
+                    'longitude' => $countryModel->longitude ?? 0,
+                    'status' => 'active',
+                    'congestion_level' => $congestion,
+                    'delay_days' => $delay,
+                ]);
+            }
+        }
+
+        $this->command->info('✅ Data pelabuhan berhasil di-seed (Total: ' . Port::count() . ')!');
     }
 }

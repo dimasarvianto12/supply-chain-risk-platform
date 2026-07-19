@@ -16,6 +16,17 @@ class DashboardController extends Controller
         $totalPorts = Port::count();
         $totalArticles = Article::count();
         
-        return view('admin.dashboard', compact('totalUsers', 'totalPorts', 'totalArticles'));
+        $recentUsers = User::latest()->take(5)->get();
+        $recentArticles = Article::latest()->take(5)->get();
+        $congestedPorts = Port::orderBy('delay_days', 'desc')->take(5)->get();
+        
+        return view('admin.dashboard', compact(
+            'totalUsers', 
+            'totalPorts', 
+            'totalArticles',
+            'recentUsers',
+            'recentArticles',
+            'congestedPorts'
+        ));
     }
 }

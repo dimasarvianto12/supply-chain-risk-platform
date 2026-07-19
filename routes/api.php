@@ -30,6 +30,7 @@ Route::get('/news', [NewsController::class, 'index']);
 Route::get('/news/{country}', [NewsController::class, 'show']);
 
 // Currency (urutan PENTING)
+Route::get('/currency', [CurrencyController::class, 'latestRates']);
 Route::get('/currency/latest/{base?}', [CurrencyController::class, 'latestRates']);
 Route::get('/currency/history/{base}/{target}', [CurrencyController::class, 'history']);
 Route::get('/currency/{base}/{target}', [CurrencyController::class, 'show']);

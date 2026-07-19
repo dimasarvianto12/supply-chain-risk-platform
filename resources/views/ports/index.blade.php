@@ -2,59 +2,86 @@
 
 @section('title', 'Port Location Dashboard')
 
-@section('styles')
+@push('styles')
 <style>
     #portMap {
-        height: 550px;
+        height: 580px;
         width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
     }
-    .port-search-box {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+    .port-list-container {
+        height: 580px;
+        display: flex;
+        flex-direction: column;
     }
     .port-list {
-        max-height: 550px;
+        flex-grow: 1;
         overflow-y: auto;
-        background: white;
-        border-radius: 8px;
-        padding: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        padding-right: 4px;
     }
-    .port-list .list-group-item {
-        border-left: 3px solid #007bff;
-        margin-bottom: 5px;
-        border-radius: 4px;
+    .port-list-item {
+        border: 1px solid #f1f3f9;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        padding: 14px 16px;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s ease;
+        background: #ffffff;
     }
-    .port-list .list-group-item:hover {
-        background: #e9ecef;
+    .port-list-item:hover {
+        background: #f8fafc;
+        transform: translateX(4px);
+        border-color: #cbd5e1;
     }
-    .port-list .list-group-item .port-name {
-        font-weight: 600;
-    }
-    .port-list .list-group-item .port-country {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    .leaflet-popup-content {
+    
+    /* Left border states matching congestion */
+    .port-list-item.border-lancar { border-left: 4px solid #10B981 !important; }
+    .port-list-item.border-sedang { border-left: 4px solid #F59E0B !important; }
+    .port-list-item.border-macet { border-left: 4px solid #EF4444 !important; }
+
+    .port-name {
+        font-weight: 700;
+        color: #1e293b;
         font-size: 0.95rem;
     }
-    .leaflet-popup-content strong {
-        display: block;
-        font-size: 1.05rem;
-        margin-bottom: 3px;
+    .port-country {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .port-popup h6 {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 6px;
+    }
+    
+    /* Custom Map Icon Bubble */
+    .port-icon-bubble {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+    .port-icon-bubble:hover {
+        transform: scale(1.15);
     }
     .loading-spinner {
         display: inline-block;
         width: 1.5rem;
         height: 1.5rem;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #3498db;
+        border: 3px solid #e2e8f0;
+        border-top: 3px solid #6366f1;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin-right: 8px;
@@ -65,64 +92,85 @@
     }
     .empty-state {
         text-align: center;
-        padding: 30px 20px;
-        color: #6c757d;
+        padding: 40px 20px;
+        color: #64748b;
     }
     .empty-state i {
-        font-size: 2.5rem;
-        color: #dee2e6;
-        margin-bottom: 10px;
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 12px;
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
-<div class="row">
+<!-- Header Section -->
+<div class="row mb-4">
     <div class="col-12">
-        <h1><i class="fas fa-ship"></i> Port Location Dashboard</h1>
-        <p>Lokasi pelabuhan dunia dengan fitur pencarian dan marker interaktif.</p>
+        <h1 class="fw-extrabold text-dark tracking-tight mb-1" style="font-size: 2.25rem;">
+            <i class="fas fa-ship text-primary"></i> Port Location Dashboard
+            <span id="totalPorts" class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2 fs-5 align-middle px-3 py-1.5 rounded-pill">0 Pelabuhan</span>
+        </h1>
+        <p class="text-muted fs-5 mb-0">Lokasi pelabuhan dunia dengan fitur pencarian dan penanda kemacetan rute.</p>
         <hr>
     </div>
 </div>
 
-<!-- Search & Filter -->
-<div class="row mb-3">
-    <div class="col-md-12">
-        <div class="port-search-box">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="searchPort" class="form-label">Cari Pelabuhan</label>
-                    <input type="text" id="searchPort" class="form-control" placeholder="Nama pelabuhan...">
-                </div>
-                <div class="col-md-4">
-                    <label for="searchCountry" class="form-label">Pilih Negara</label>
-                    <select id="searchCountry" class="form-select">
-                        <option value="">Semua Negara</option>
-                        @foreach($countries as $country)
-                            <option value="{{ $country->name }}">{{ $country->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button id="searchBtn" class="btn btn-primary w-100">
-                        <i class="fas fa-search"></i> Cari
-                    </button>
+<!-- Search & Filter Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card premium-card">
+            <div class="premium-card-header">
+                <i class="fas fa-filter text-primary"></i>
+                <span>Cari & Filter Pelabuhan</span>
+            </div>
+            <div class="premium-card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="searchPort" class="form-label fw-bold text-secondary mb-2" style="font-size: 0.85rem;">CARI PELABUHAN</label>
+                        <input type="text" id="searchPort" class="form-control py-2 rounded-3" style="border-color: #cbd5e1; box-shadow: none;" placeholder="Nama pelabuhan...">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="searchCountry" class="form-label fw-bold text-secondary mb-2" style="font-size: 0.85rem;">PILIH NEGARA</label>
+                        <select id="searchCountry" class="form-select py-2 rounded-3" style="border-color: #cbd5e1; box-shadow: none;">
+                            <option value="">Semua Negara</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country->name }}">{{ $country->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="searchBtn" class="btn btn-primary w-100 py-2.5 rounded-pill fw-bold">
+                            <i class="fas fa-search me-1"></i> Cari
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Map & List -->
-<div class="row">
+<!-- Map & List Grid -->
+<div class="row g-4 mb-4">
+    <!-- Map Column -->
     <div class="col-lg-8">
         <div id="portMap"></div>
     </div>
+    
+    <!-- Sidebar List Column -->
     <div class="col-lg-4">
-        <div class="port-list" id="portList">
-            <div class="text-center py-4">
-                <div class="loading-spinner"></div>
-                <p class="mt-2">Memuat pelabuhan...</p>
+        <div class="card premium-card port-list-container">
+            <div class="premium-card-header bg-light">
+                <i class="fas fa-anchor text-primary"></i>
+                <span>Daftar Pelabuhan</span>
+            </div>
+            <div class="premium-card-body d-flex flex-column p-3" style="overflow: hidden; height: 100%;">
+                <div class="port-list" id="portList">
+                    <div class="text-center py-5 text-muted">
+                        <div class="loading-spinner"></div>
+                        <p class="mt-2">Mengunduh data pelabuhan...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -132,9 +180,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ==========================================
-    // 1. ELEMEN
-    // ==========================================
     const mapContainer = document.getElementById('portMap');
     const portList = document.getElementById('portList');
     const searchPort = document.getElementById('searchPort');
@@ -145,28 +190,26 @@ document.addEventListener('DOMContentLoaded', function() {
     let markers = [];
     let allPorts = [];
 
-    // ==========================================
-    // 2. INISIALISASI PETA
-    // ==========================================
+    // Initialize Map with modern CartoDB Voyager layer
     function initMap() {
-        map = L.map('portMap').setView([20, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        map = L.map('portMap').setView([20, 0], 2.2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
         console.log('🗺️ Peta pelabuhan siap.');
     }
 
-    // ==========================================
-    // 3. FUNGSI MEMUAT DATA PELABUHAN
-    // ==========================================
+    // Load port data from API
     function loadPorts(params = {}) {
         const query = new URLSearchParams(params);
         const url = `/api/ports?${query.toString()}`;
 
         portList.innerHTML = `
-            <div class="text-center py-4">
+            <div class="text-center py-5 text-muted">
                 <div class="loading-spinner"></div>
-                <p class="mt-2">Memuat pelabuhan...</p>
+                <p class="mt-2">Menghubungi database pelabuhan...</p>
             </div>
         `;
 
@@ -176,7 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Data pelabuhan:', data);
                 allPorts = data.data || data;
                 if (!Array.isArray(allPorts)) {
                     allPorts = [];
@@ -186,19 +228,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('❌ Error:', error);
                 portList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle" style="color: #dc3545;"></i>
-                        <p class="text-danger">Gagal memuat data: ${error.message}</p>
+                    <div class="empty-state text-danger">
+                        <i class="fas fa-exclamation-circle text-danger mb-2"></i>
+                        <p class="mb-0">Gagal memuat data: ${error.message}</p>
                     </div>
                 `;
             });
     }
 
-    // ==========================================
-    // 4. RENDER PETA DAN DAFTAR
-    // ==========================================
+    // Render Leaflet markers and sidebar HTML
     function renderPorts(ports) {
-        // Hapus marker lama
         if (markers.length) {
             markers.forEach(m => map.removeLayer(m));
             markers = [];
@@ -208,8 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
             portList.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-ship"></i>
-                    <p>Tidak ada pelabuhan ditemukan.</p>
-                    <small class="text-muted">Coba ubah kata kunci pencarian.</small>
+                    <p class="fw-bold mb-1">Tidak ada pelabuhan</p>
+                    <small class="text-muted">Coba ubah filter atau kata kunci pencarian Anda.</small>
                 </div>
             `;
             return;
@@ -224,33 +263,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (isNaN(lat) || isNaN(lng)) return;
 
-            const marker = L.marker([lat, lng])
+            // Determine dynamic classes based on congestion level
+            let iconColorClass = 'bg-success';
+            let borderClass = 'border-lancar';
+            let badgeClass = 'bg-success-subtle text-success border border-success-subtle';
+            let label = 'Lancar';
+            
+            if (port.congestion_level === 'high') {
+                iconColorClass = 'bg-danger';
+                borderClass = 'border-macet';
+                badgeClass = 'bg-danger-subtle text-danger border border-danger-subtle';
+                label = `Macet (Delay ${port.delay_days} Hr)`;
+            } else if (port.congestion_level === 'medium') {
+                iconColorClass = 'bg-warning text-dark';
+                borderClass = 'border-sedang';
+                badgeClass = 'bg-warning-subtle text-warning border border-warning-subtle';
+                label = `Sedang (Delay ${port.delay_days} Hr)`;
+            }
+
+            // Custom Styled DivIcon
+            const customIcon = L.divIcon({
+                html: `<div class="port-icon-bubble ${iconColorClass}"><i class="fas fa-anchor text-white" style="font-size:0.85rem;"></i></div>`,
+                className: 'leaflet-port-marker',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            const marker = L.marker([lat, lng], {icon: customIcon})
                 .addTo(map)
                 .bindPopup(`
-                    <strong>${port.name}</strong>
-                    <span style="display:block; color:#6c757d;">${port.country}</span>
-                    <span class="badge bg-secondary mt-1">${port.status || 'active'}</span>
+                    <div class="port-popup">
+                        <h6>${port.name}</h6>
+                        <p class="text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${port.country}</p>
+                        <span class="badge ${badgeClass} px-2.5 py-1.5 rounded">${label}</span>
+                    </div>
                 `);
             markers.push(marker);
             markerGroup.addLayer(marker);
 
             listHtml += `
-                <div class="list-group-item" data-lat="${lat}" data-lng="${lng}">
-                    <div class="port-name">${port.name}</div>
-                    <div class="port-country"><i class="fas fa-map-marker-alt"></i> ${port.country}</div>
-                    <span class="badge bg-secondary">${port.status || 'active'}</span>
+                <div class="port-list-item ${borderClass}" data-lat="${lat}" data-lng="${lng}">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <div>
+                            <div class="port-name">${port.name}</div>
+                            <div class="port-country"><i class="fas fa-map-marker-alt text-primary me-1"></i>${port.country}</div>
+                        </div>
+                        <span class="badge ${badgeClass} rounded-pill px-2.5 py-1.5 fw-bold" style="font-size:0.75rem; min-width: 60px; text-align: center;">
+                            ${(port.congestion_level || 'lancar').toUpperCase()}
+                        </span>
+                    </div>
                 </div>
             `;
         });
 
         if (markers.length > 0) {
-            map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
-            setTimeout(() => map.invalidateSize(), 200);
+            map.fitBounds(markerGroup.getBounds(), { padding: [40, 40] });
+            setTimeout(() => map.invalidateSize(), 300);
         }
 
         portList.innerHTML = listHtml;
 
-        document.querySelectorAll('.list-group-item').forEach(item => {
+        // Click interaction: Fly to port and open popup
+        document.querySelectorAll('.port-list-item').forEach(item => {
             item.addEventListener('click', function() {
                 const lat = parseFloat(this.dataset.lat);
                 const lng = parseFloat(this.dataset.lng);
@@ -266,12 +340,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        console.log(`✅ ${markers.length} pelabuhan ditampilkan.`);
+        const totalPortsEl = document.getElementById('totalPorts');
+        if (totalPortsEl) {
+            totalPortsEl.textContent = `${ports.length} Pelabuhan`;
+        }
     }
 
-    // ==========================================
-    // 5. FUNGSI PENCARIAN
-    // ==========================================
     function searchPorts() {
         const name = searchPort.value.trim();
         const country = searchCountry.value.trim();

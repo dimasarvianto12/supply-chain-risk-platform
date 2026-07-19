@@ -31,6 +31,29 @@ class DashboardController extends Controller
         // Ambil 5 negara dengan risiko tertinggi
         $topRisks = $latestRisks->sortByDesc('total_score')->take(5)->values();
 
+        // Hitung Distribusi Risiko & Cuaca Ekstrem
+        $lowCount = 0;
+        $mediumCount = 0;
+        $highCount = 0;
+        $extremeWeatherCount = 0;
+
+        foreach ($latestRisks as $risk) {
+            if ($risk->total_score < 30) {
+                $lowCount++;
+            } elseif ($risk->total_score <= 60) {
+                $mediumCount++;
+            } else {
+                $highCount++;
+            }
+
+            if ($risk->weather_risk > 60) {
+                $extremeWeatherCount++;
+            }
+        }
+
+        // Hitung Berita Terbaru (NewsCache + Articles)
+        $newsCount = \App\Models\NewsCache::count() + \App\Models\Article::count();
+
         return response()->json([
             'total_countries' => $totalCountries,
             'avg_risk' => round($avgRisk, 2),
@@ -39,6 +62,13 @@ class DashboardController extends Controller
                 'code' => $risk->country->code,
                 'total_score' => $risk->total_score,
             ]),
+            'distribution' => [
+                'low' => $lowCount,
+                'medium' => $mediumCount,
+                'high' => $highCount,
+            ],
+            'extreme_weather_count' => $extremeWeatherCount,
+            'news_count' => $newsCount,
         ]);
     }
 }

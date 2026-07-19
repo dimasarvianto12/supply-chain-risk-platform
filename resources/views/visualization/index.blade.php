@@ -2,38 +2,19 @@
 
 @section('title', 'Data Visualization Dashboard')
 
-@section('styles')
+@push('styles')
 <style>
-    .chart-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    .chart-card .chart-header {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 15px;
-        font-size: 1.1rem;
-    }
     .chart-container {
         position: relative;
-        height: 250px;
+        height: 280px;
         width: 100%;
-    }
-    .filter-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
     }
     .loading-spinner {
         display: inline-block;
-        width: 1.5rem;
-        height: 1.5rem;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #3498db;
+        width: 1.2rem;
+        height: 1.2rem;
+        border: 2.5px solid #e2e8f0;
+        border-top: 2.5px solid #6366f1;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin-right: 8px;
@@ -42,94 +23,147 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-    .empty-state {
-        text-align: center;
-        padding: 30px;
-        color: #6c757d;
-    }
-    .empty-state i {
-        font-size: 2rem;
-        color: #dee2e6;
-        margin-bottom: 10px;
+    
+    /* Left border states matching charts */
+    .gdp-card { border-left: 4px solid #3b82f6 !important; }
+    .inflation-card { border-left: 4px solid #ef4444 !important; }
+    .currency-card { border-left: 4px solid #10b981 !important; }
+    .risk-card { border-left: 4px solid #f59e0b !important; }
+    
+    .chart-info-tag {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
-<div class="row">
+<!-- Header Section -->
+<div class="row mb-4">
     <div class="col-12">
-        <h1><i class="fas fa-chart-pie"></i> Data Visualization Dashboard</h1>
-        <p>Grafik tren ekonomi, kurs, dan risiko rantai pasok.</p>
+        <h1 class="fw-extrabold text-dark tracking-tight mb-1" style="font-size: 2.25rem;">
+            <i class="fas fa-chart-pie text-primary"></i> Data Visualization Dashboard
+        </h1>
+        <p class="text-muted fs-5 mb-0">Grafik tren makroekonomi, nilai tukar kurs, dan analisis risiko rantai pasok.</p>
         <hr>
     </div>
 </div>
 
-<!-- Filter -->
-<div class="row">
+<!-- Filter Control Panel -->
+<div class="row mb-4">
     <div class="col-12">
-        <div class="filter-section">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="countrySelect" class="form-label">Pilih Negara</label>
-                    <select id="countrySelect" class="form-select">
-                        <option value="">-- Pilih Negara --</option>
-                        @foreach($countries as $country)
-                            <option value="{{ $country->code }}">{{ $country->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button id="loadBtn" class="btn btn-primary w-100">
-                        <i class="fas fa-sync-alt"></i> Muat Data
-                    </button>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-muted small" id="statusText">Pilih negara dan klik tombol untuk memuat data.</div>
+        <div class="card premium-card">
+            <div class="premium-card-header">
+                <i class="fas fa-filter text-primary"></i>
+                <span>Pilih Cakupan Analisis</span>
+            </div>
+            <div class="premium-card-body">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-5">
+                        <label for="countrySelect" class="form-label fw-bold text-secondary mb-2" style="font-size: 0.85rem;">NEGARA TARGET</label>
+                        <select id="countrySelect" class="form-select py-2 rounded-3" style="border-color: #cbd5e1; box-shadow: none;">
+                            <option value="">-- Pilih Negara --</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country->code }}">{{ $country->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label d-none d-md-block mb-2">&nbsp;</label>
+                        <button id="loadBtn" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">
+                            <i class="fas fa-sync-alt me-1"></i> Muat Visualisasi
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label d-none d-md-block mb-2">&nbsp;</label>
+                        <div class="text-muted fw-semibold" id="statusText" style="font-size: 0.9rem;">
+                            Silakan pilih negara dan muat data.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts -->
-<div class="row">
+<!-- Charts Grid -->
+<div class="row g-4">
+    <!-- GDP Chart -->
     <div class="col-md-6">
-        <div class="chart-card">
-            <div class="chart-header"><i class="fas fa-chart-line text-primary"></i> Tren GDP</div>
-            <div class="chart-container">
-                <canvas id="gdpChart"></canvas>
+        <div class="card premium-card gdp-card">
+            <div class="premium-card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-chart-bar text-primary"></i> Tren GDP
+                </span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded chart-info-tag" id="gdpInfo">
+                    Belum ada data
+                </span>
             </div>
-            <div class="text-muted small text-center mt-2" id="gdpInfo">Belum ada data</div>
+            <div class="premium-card-body">
+                <div class="chart-container">
+                    <canvas id="gdpChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Inflation Chart -->
     <div class="col-md-6">
-        <div class="chart-card">
-            <div class="chart-header"><i class="fas fa-chart-line text-danger"></i> Tren Inflasi</div>
-            <div class="chart-container">
-                <canvas id="inflationChart"></canvas>
+        <div class="card premium-card inflation-card">
+            <div class="premium-card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-chart-line text-danger"></i> Tren Inflasi
+                </span>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 rounded chart-info-tag" id="inflationInfo">
+                    Belum ada data
+                </span>
             </div>
-            <div class="text-muted small text-center mt-2" id="inflationInfo">Belum ada data</div>
+            <div class="premium-card-body">
+                <div class="chart-container">
+                    <canvas id="inflationChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4 mt-1">
+    <!-- Currency Chart -->
     <div class="col-md-6">
-        <div class="chart-card">
-            <div class="chart-header"><i class="fas fa-chart-line text-success"></i> Tren Kurs</div>
-            <div class="chart-container">
-                <canvas id="currencyChart"></canvas>
+        <div class="card premium-card currency-card">
+            <div class="premium-card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-chart-line text-success"></i> Tren Kurs
+                </span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 rounded chart-info-tag" id="currencyInfo">
+                    Belum ada data
+                </span>
             </div>
-            <div class="text-muted small text-center mt-2" id="currencyInfo">Belum ada data</div>
+            <div class="premium-card-body">
+                <div class="chart-container">
+                    <canvas id="currencyChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Risk Trend Chart -->
     <div class="col-md-6">
-        <div class="chart-card">
-            <div class="chart-header"><i class="fas fa-chart-line text-warning"></i> Tren Risiko</div>
-            <div class="chart-container">
-                <canvas id="riskChart"></canvas>
+        <div class="card premium-card risk-card">
+            <div class="premium-card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-shield-alt text-warning"></i> Tren Risiko Berkelanjutan
+                </span>
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1.5 rounded chart-info-tag" id="riskInfo">
+                    Belum ada data
+                </span>
             </div>
-            <div class="text-muted small text-center mt-2" id="riskInfo">Belum ada data</div>
+            <div class="premium-card-body">
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -138,9 +172,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ==========================================
-    // 1. ELEMEN
-    // ==========================================
     const countrySelect = document.getElementById('countrySelect');
     const loadBtn = document.getElementById('loadBtn');
     const statusText = document.getElementById('statusText');
@@ -151,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const currencyCanvas = document.getElementById('currencyChart');
     const riskCanvas = document.getElementById('riskChart');
 
-    // Info texts
+    // Info labels
     const gdpInfo = document.getElementById('gdpInfo');
     const inflationInfo = document.getElementById('inflationInfo');
     const currencyInfo = document.getElementById('currencyInfo');
@@ -163,16 +194,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let currencyChart = null;
     let riskChart = null;
 
-    // ==========================================
-    // 2. FUNGSI LOAD DATA
-    // ==========================================
+    // Load Data trigger
     function loadData(countryCode) {
         if (!countryCode) {
-            statusText.textContent = '⚠️ Silakan pilih negara terlebih dahulu.';
+            statusText.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i> Silakan pilih negara target.</span>';
             return;
         }
 
-        statusText.innerHTML = '<span class="loading-spinner"></span> Memuat data...';
+        statusText.innerHTML = '<span class="loading-spinner"></span> Memuat visualisasi...';
 
         // Load GDP
         fetch(`/api/visualization/gdp/${countryCode}`)
@@ -180,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => renderGdpChart(data))
             .catch(err => {
                 console.error('GDP error:', err);
-                gdpInfo.textContent = '❌ Gagal memuat data GDP';
+                gdpInfo.textContent = 'Gagal memuat GDP';
             });
 
         // Load Inflation
@@ -189,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => renderInflationChart(data))
             .catch(err => {
                 console.error('Inflation error:', err);
-                inflationInfo.textContent = '❌ Gagal memuat data Inflasi';
+                inflationInfo.textContent = 'Gagal memuat Inflasi';
             });
 
         // Load Currency
@@ -198,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => renderCurrencyChart(data))
             .catch(err => {
                 console.error('Currency error:', err);
-                currencyInfo.textContent = '❌ Gagal memuat data Kurs';
+                currencyInfo.textContent = 'Gagal memuat Kurs';
             });
 
         // Load Risk
@@ -207,15 +236,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => renderRiskChart(data))
             .catch(err => {
                 console.error('Risk error:', err);
-                riskInfo.textContent = '❌ Gagal memuat data Risiko';
+                riskInfo.textContent = 'Gagal memuat Risiko';
             });
 
-        statusText.textContent = `✅ Data untuk ${countrySelect.options[countrySelect.selectedIndex].text} dimuat.`;
+        setTimeout(() => {
+            const countryName = countrySelect.options[countrySelect.selectedIndex].text;
+            statusText.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Visualisasi ${countryName} aktif</span>`;
+        }, 800);
     }
 
-    // ==========================================
-    // 3. RENDER FUNCTIONS
-    // ==========================================
+    // GDP Render (Bar Chart with gradient fill)
     function renderGdpChart(data) {
         if (gdpChart) { gdpChart.destroy(); }
         if (!data.data || data.data.length === 0) {
@@ -225,6 +255,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const labels = data.data.map(d => d.year);
         const values = data.data.map(d => d.gdp);
         const ctx = gdpCanvas.getContext('2d');
+
+        // Create elegant blue-gradient bar
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, '#3b82f6');
+        gradient.addColorStop(1, '#93c5fd');
+
         gdpChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -232,9 +268,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'GDP (USD)',
                     data: values,
-                    backgroundColor: 'rgba(52,152,219,0.6)',
-                    borderColor: '#3498db',
-                    borderWidth: 2,
+                    backgroundColor: gradient,
+                    borderColor: '#3b82f6',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    borderSkipped: false
                 }]
             },
             options: {
@@ -243,18 +281,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        padding: 10,
+                        titleFont: { family: 'Plus Jakarta Sans', weight: '700' },
+                        bodyFont: { family: 'Plus Jakarta Sans' },
                         callbacks: {
                             label: function(context) {
-                                return 'GDP: $' + context.parsed.y.toLocaleString();
+                                return ' GDP: $' + context.parsed.y.toLocaleString();
                             }
                         }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Plus Jakarta Sans' } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { family: 'Plus Jakarta Sans' } }
                     }
                 }
             }
         });
-        gdpInfo.textContent = `GDP ${data.country} (${data.data.length} tahun)`;
+        gdpInfo.textContent = `${data.country} (${data.data.length} Tahun)`;
     }
 
+    // Inflation Render (Line Chart with custom red gradient)
     function renderInflationChart(data) {
         if (inflationChart) { inflationChart.destroy(); }
         if (!data.data || data.data.length === 0) {
@@ -264,6 +316,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const labels = data.data.map(d => d.year);
         const values = data.data.map(d => d.inflation);
         const ctx = inflationCanvas.getContext('2d');
+
+        // Red-gradient path fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+        gradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+
         inflationChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -271,23 +329,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Inflasi (%)',
                     data: values,
-                    borderColor: '#e74c3c',
-                    backgroundColor: 'rgba(231,76,60,0.1)',
+                    borderColor: '#ef4444',
+                    borderWidth: 3,
+                    backgroundColor: gradient,
                     fill: true,
-                    tension: 0.3,
+                    tension: 0.35,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        padding: 10,
+                        titleFont: { family: 'Plus Jakarta Sans', weight: '700' },
+                        bodyFont: { family: 'Plus Jakarta Sans' },
+                        callbacks: {
+                            label: function(context) {
+                                return ' Inflasi: ' + context.parsed.y.toFixed(2) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Plus Jakarta Sans' } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { family: 'Plus Jakarta Sans' } }
+                    }
                 }
             }
         });
-        inflationInfo.textContent = `Inflasi ${data.country} (${data.data.length} tahun)`;
+        inflationInfo.textContent = `${data.country} (${data.data.length} Tahun)`;
     }
 
+    // Currency Render (Line Chart with emerald gradient)
     function renderCurrencyChart(data) {
         if (currencyChart) { currencyChart.destroy(); }
         if (!data.data || data.data.length === 0) {

@@ -10,6 +10,7 @@ use App\Http\Controllers\PortPageController;
 use App\Http\Controllers\VisualizationController;
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -47,6 +48,9 @@ Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/ports', [PortPageController::class, 'index'])->name('ports.index');
 
 Route::get('/visualization', [VisualizationController::class, 'index'])->name('visualization.index');
+
+Route::get('/decision', [DecisionController::class, 'index'])->name('decision.index');
+Route::post('/decision/analyze', [DecisionController::class, 'analyze'])->name('decision.analyze');
 
 Route::get('/compare', [CompareController::class, 'index'])->name('compare.index');
 
