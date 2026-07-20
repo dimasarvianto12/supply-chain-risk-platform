@@ -14,11 +14,7 @@
                 Memantau risiko rantai pasok global secara real-time.
             </p>
         </div>
-        <div class="mt-2 mt-md-0">
-            <span class="badge bg-light text-dark border px-3 py-2 fs-6 rounded-pill">
-                <span class="spinner-grow spinner-grow-sm text-danger me-2" role="status"></span> Live Monitoring
-            </span>
-        </div>
+
     </div>
 </div>
 

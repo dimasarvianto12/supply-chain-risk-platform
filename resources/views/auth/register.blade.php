@@ -1,51 +1,55 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
 @section('title', 'Register')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <i class="fas fa-user-plus"></i> Daftar Akun Baru
-            </div>
-            <div class="card-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
-                <form method="POST" action="{{ route('register.post') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nama Lengkap</label>
-                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required autofocus>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                        <small class="text-muted">Minimal 6 karakter.</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">Daftar</button>
-                </form>
-                <div class="mt-3 text-center">
-                    <small>Sudah punya akun? <a href="{{ route('login') }}">Login</a></small>
-                </div>
-            </div>
-        </div>
+@if ($errors->any())
+    <div class="alert alert-danger" style="font-size: 0.875rem;">
+        <ul class="mb-0 ps-3">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
-</div>
+@endif
+
+<form method="POST" action="{{ route('register.post') }}">
+    @csrf
+    
+    <!-- Name -->
+    <div class="mb-3">
+        <label for="name" class="form-label auth-label">Name</label>
+        <input type="text" class="form-control auth-input w-100" id="name" name="name" value="{{ old('name') }}" required autofocus>
+    </div>
+
+    <!-- Email Address -->
+    <div class="mb-3">
+        <label for="email" class="form-label auth-label">Email</label>
+        <input type="email" class="form-control auth-input w-100" id="email" name="email" value="{{ old('email') }}" required>
+    </div>
+    
+    <!-- Password -->
+    <div class="mb-3">
+        <label for="password" class="form-label auth-label">Password</label>
+        <input type="password" class="form-control auth-input w-100" id="password" name="password" required>
+    </div>
+
+    <!-- Confirm Password -->
+    <div class="mb-4">
+        <label for="password_confirmation" class="form-label auth-label">Confirm Password</label>
+        <input type="password" class="form-control auth-input w-100" id="password_confirmation" name="password_confirmation" required>
+    </div>
+    
+    <!-- Actions -->
+    <div class="d-flex align-items-center justify-content-between mt-4">
+        <a class="auth-link" href="{{ route('login') }}">
+            Already registered?
+        </a>
+        <button type="submit" class="auth-btn">
+            Register
+        </button>
+    </div>
+</form>
+
 @endsection

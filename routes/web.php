@@ -19,13 +19,7 @@ use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Api\FavoriteController as ApiFavoriteController;
 
 // ================================================================
-// 1. HALAMAN UTAMA (DASHBOARD)
-// ================================================================
-Route::get('/', [DashboardController::class, 'index'])->name('home');
-Route::get('/api/dashboard/summary', [DashboardController::class, 'summary'])->name('dashboard.summary');
-
-// ================================================================
-// 2. AUTHENTICATION (Login, Register, Logout)
+// 1. AUTHENTICATION (Login, Register, Logout)
 // ================================================================
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -34,29 +28,32 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ================================================================
-// 3. FITUR UTAMA (Semua Halaman)
+// 2. FITUR UTAMA (Hanya bisa diakses jika sudah login)
 // ================================================================
-Route::get('/countries', [CountryPageController::class, 'index'])->name('countries.index');
-Route::get('/api/country/{code}', [CountryPageController::class, 'detail'])->name('country.detail');
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
+    Route::get('/api/dashboard/summary', [DashboardController::class, 'summary'])->name('dashboard.summary');
 
-Route::get('/weather-map', [WeatherMapController::class, 'index'])->name('weather.map');
+    Route::get('/countries', [CountryPageController::class, 'index'])->name('countries.index');
+    Route::get('/api/country/{code}', [CountryPageController::class, 'detail'])->name('country.detail');
 
-Route::get('/currency', [CurrencyDashboardController::class, 'index'])->name('currency.dashboard');
+    Route::get('/weather-map', [WeatherMapController::class, 'index'])->name('weather.map');
 
-Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+    Route::get('/currency', [CurrencyDashboardController::class, 'index'])->name('currency.dashboard');
 
-Route::get('/ports', [PortPageController::class, 'index'])->name('ports.index');
+    Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 
-Route::get('/visualization', [VisualizationController::class, 'index'])->name('visualization.index');
+    Route::get('/ports', [PortPageController::class, 'index'])->name('ports.index');
 
-Route::get('/decision', [DecisionController::class, 'index'])->name('decision.index');
-Route::post('/decision/analyze', [DecisionController::class, 'analyze'])->name('decision.analyze');
+    Route::get('/visualization', [VisualizationController::class, 'index'])->name('visualization.index');
 
-Route::get('/compare', [CompareController::class, 'index'])->name('compare.index');
+    Route::get('/decision', [DecisionController::class, 'index'])->name('decision.index');
+    Route::post('/decision/analyze', [DecisionController::class, 'analyze'])->name('decision.analyze');
 
-Route::get('/favorites', [FavoriteController::class, 'index'])
-    ->name('favorites.index')
-    ->middleware('auth');
+    Route::get('/compare', [CompareController::class, 'index'])->name('compare.index');
+
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+});
 
 // ================================================================
 // 4. API FAVORIT (Dengan Middleware Auth)

@@ -34,18 +34,20 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Menu kiri -->
+                <!-- Menu kiri (Hanya tampil jika sudah login) -->
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('countries.index') }}">Countries</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('weather.map') }}">Weather Map</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('currency.dashboard') }}">Currency</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('news.index') }}">News</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('ports.index') }}">Ports</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('visualization.index') }}">Visualization</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('compare.index') }}">Compare</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('decision.index') }}">Import Analyzer</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('favorites.index') }}">Favorites</a></li>
+                    @auth
+                        <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('countries.index') }}">Countries</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('weather.map') }}">Weather Map</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('currency.dashboard') }}">Currency</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('news.index') }}">News</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('ports.index') }}">Ports</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('visualization.index') }}">Visualization</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('compare.index') }}">Compare</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('decision.index') }}">Import Analyzer</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('favorites.index') }}">Favorites</a></li>
+                    @endauth
                 </ul>
 
                 <!-- Menu kanan (Login/Register/Logout + Admin) -->
