@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Supply Chain Risk Platform')</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <!-- Google Fonts Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,7 +106,7 @@
     <div class="auth-logo text-center">
         <!-- Logo -->
         <a href="/" class="text-decoration-none text-secondary">
-            <i class="fas fa-shield-halved"></i>
+            <img src="{{ asset('favicon.svg') }}" alt="RiskPlatform Logo" style="width: 72px; height: 72px;">
         </a>
     </div>
 

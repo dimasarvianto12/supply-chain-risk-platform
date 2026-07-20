@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Supply Chain Risk Platform')</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <!-- Google Fonts Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,9 +27,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-extrabold text-white" href="{{ url('/') }}">
-                <div class="d-flex align-items-center justify-content-center bg-primary rounded-3 text-white" style="width: 32px; height: 32px; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);">
-                    <i class="fas fa-shield-halved text-white fs-6"></i>
-                </div>
+                <img src="{{ asset('favicon.svg') }}" alt="RiskPlatform Logo" style="width: 36px; height: 36px; drop-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);">
                 <span class="tracking-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">RiskPlatform</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

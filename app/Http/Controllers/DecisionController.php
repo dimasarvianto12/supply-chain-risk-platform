@@ -94,12 +94,16 @@ class DecisionController extends Controller
             'origin' => [
                 'country' => $originCountry->name,
                 'port' => $originPort->name,
+                'lat' => $originPort->latitude,
+                'lng' => $originPort->longitude,
                 'congestion' => $originPort->congestion_level,
                 'delay' => $originPort->delay_days
             ],
             'destination' => [
                 'country' => $destCountry->name,
                 'port' => $destPort->name,
+                'lat' => $destPort->latitude,
+                'lng' => $destPort->longitude,
                 'congestion' => $destPort->congestion_level,
                 'delay' => $destPort->delay_days
             ],

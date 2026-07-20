@@ -214,6 +214,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Map Container -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card premium-card">
+                    <div class="premium-card-header">
+                        <i class="fas fa-map-marked-alt text-primary"></i>
+                        <span>Peta Rute Pelayaran</span>
+                    </div>
+                    <div class="premium-card-body p-0">
+                        <div id="routeMap" style="height: 350px; width: 100%; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; z-index: 1;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -224,6 +239,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('analyzeForm');
     const btn = document.getElementById('btnAnalyze');
     const resultContainer = document.getElementById('resultContainer');
+
+    let routeMap = null;
+    let routeLine = null;
+    let originMarker = null;
+    let destMarker = null;
 
     const originCountrySelect = document.getElementById('origin_country_id');
     const originPortSelect = document.getElementById('origin_port_id');
@@ -316,6 +336,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             document.getElementById('recTitle').innerHTML = `<i class="fas ${icon}"></i> ${data.recommendation.status.toUpperCase()}`;
             document.getElementById('recDesc').textContent = data.recommendation.message;
+
+            // Render the shipping map
+            renderMap(data.origin.lat, data.origin.lng, data.destination.lat, data.destination.lng, data.origin.port, data.destination.port);
         })
         .catch(err => {
             console.error(err);
@@ -335,6 +358,50 @@ document.addEventListener('DOMContentLoaded', function() {
         if (id === 'Total') {
             bar.className = 'progress-bar progress-bar-striped progress-bar-animated ' + (value > 70 ? 'bg-danger' : (value > 40 ? 'bg-warning text-dark' : 'bg-success'));
         }
+    }
+
+    function renderMap(originLat, originLng, destLat, destLng, originName, destName) {
+        if (!routeMap) {
+            routeMap = L.map('routeMap').setView([20, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(routeMap);
+        }
+        
+        if (originMarker) routeMap.removeLayer(originMarker);
+        if (destMarker) routeMap.removeLayer(destMarker);
+        if (routeLine) routeMap.removeLayer(routeLine);
+        
+        // Custom icons
+        const iconStart = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div style="background-color:#ef4444; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        });
+        const iconEnd = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div style="background-color:#10b981; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        });
+
+        originMarker = L.marker([originLat, originLng], {icon: iconStart}).bindPopup('<b>Asal (Muat):</b><br>' + originName).addTo(routeMap);
+        destMarker = L.marker([destLat, destLng], {icon: iconEnd}).bindPopup('<b>Tujuan (Bongkar):</b><br>' + destName).addTo(routeMap);
+        
+        // Draw polyline (curved or straight depending on library, we use straight dash)
+        const latlngs = [
+            [originLat, originLng],
+            [destLat, destLng]
+        ];
+        
+        routeLine = L.polyline(latlngs, {color: '#6366f1', weight: 3, dashArray: '8, 8', opacity: 0.8}).addTo(routeMap);
+        
+        // Force Leaflet to recalculate size when unhidden
+        setTimeout(() => {
+            routeMap.invalidateSize();
+            routeMap.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+        }, 100);
     }
 });
 </script>
