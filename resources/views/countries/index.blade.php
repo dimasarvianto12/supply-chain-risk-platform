@@ -160,6 +160,19 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
+    // Check if there is a 'code' parameter in the URL (e.g. from favorites page)
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeParam = urlParams.get('code');
+    
+    if (codeParam) {
+        select.value = codeParam;
+        if (select.value) { // Ensure the code exists in dropdown options
+            select.dispatchEvent(new Event('change'));
+        }
+    }
+
+
+
     function renderCountryDetail(data) {
         const population = data.population ? new Intl.NumberFormat('id-ID').format(data.population) : 'N/A';
         

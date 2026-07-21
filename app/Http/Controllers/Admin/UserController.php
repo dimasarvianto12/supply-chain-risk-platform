@@ -41,7 +41,7 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('watchlists.country')->findOrFail($id);
         return view('admin.users.form', compact('user'));
     }
 

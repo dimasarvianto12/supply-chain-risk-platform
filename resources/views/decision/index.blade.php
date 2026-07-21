@@ -193,8 +193,8 @@
                     </div>
                     <div class="premium-card-body d-flex flex-column justify-content-between">
                         <div>
-                            <p class="mb-2"><i class="fas fa-plane-departure text-muted me-1.5" style="width: 16px;"></i><strong>Asal:</strong> <span id="txtOriginPort" class="text-dark"></span> (<span id="txtOriginCongestion" class="fw-bold"></span>)</p>
-                            <p class="mb-3"><i class="fas fa-plane-arrival text-muted me-1.5" style="width: 16px;"></i><strong>Tujuan:</strong> <span id="txtDestPort" class="text-dark"></span> (<span id="txtDestCongestion" class="fw-bold"></span>)</p>
+                            <p class="mb-2"><i class="fas fa-ship text-muted me-1.5" style="width: 16px;"></i><strong>Asal:</strong> <span id="txtOriginPort" class="text-dark"></span> (<span id="txtOriginCongestion" class="fw-bold"></span>)</p>
+                            <p class="mb-3"><i class="fas fa-anchor text-muted me-1.5" style="width: 16px;"></i><strong>Tujuan:</strong> <span id="txtDestPort" class="text-dark"></span> (<span id="txtDestCongestion" class="fw-bold"></span>)</p>
                             <hr class="my-3" style="border-color: #e2e8f0;">
                             <p class="mb-2 text-secondary" style="font-size: 0.9rem;"><i class="fas fa-route me-1.5" style="width: 16px;"></i> Jarak Pelayaran: <strong id="txtDistance" class="text-dark">0 km</strong></p>
                             <p class="mb-2 text-secondary" style="font-size: 0.9rem;"><i class="fas fa-hourglass-half me-1.5" style="width: 16px;"></i> Waktu Berlayar: <strong id="txtBaseDays" class="text-dark">0 Hari</strong> <span class="small text-muted">(Kecepatan 20 knots)</span></p>

@@ -16,6 +16,7 @@
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
+        cursor: pointer;
     }
     .favorite-card:hover {
         transform: translateY(-5px);
@@ -212,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             html += `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card favorite-card ${borderClass} p-4" data-code="${country.code}">
+                    <div class="card favorite-card ${borderClass} p-4" data-code="${country.code}" onclick="window.location.href='/countries?code=${country.code}'">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="d-flex align-items-center">
                                 ${country.flag ? `<img src="${country.flag}" class="flag-img" alt="${country.name}">` : ''}
@@ -221,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <span class="country-code">(${country.code})</span>
                                 </div>
                             </div>
-                            <button class="remove-btn" onclick="removeFavorite('${country.code}')" title="Hapus dari Pemantauan">
+                            <button class="remove-btn" onclick="event.stopPropagation(); removeFavorite('${country.code}')" title="Hapus dari Pemantauan">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>

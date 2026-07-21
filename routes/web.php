@@ -76,6 +76,7 @@ Route::prefix('admin')
         Route::resource('users', AdminUserController::class);
         Route::resource('ports', AdminPortController::class);
         Route::resource('articles', AdminArticleController::class);
+        Route::resource('favorites', \App\Http\Controllers\Admin\FavoriteController::class)->only(['destroy']);
     });
 
 // ================================================================

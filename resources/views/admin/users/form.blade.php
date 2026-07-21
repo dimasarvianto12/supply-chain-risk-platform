@@ -58,4 +58,57 @@
         </form>
     </div>
 </div>
+
+@if(isset($user))
+<div class="card premium-card mt-4">
+    <div class="premium-card-header bg-light border-bottom">
+        <i class="fas fa-star text-warning"></i>
+        <span class="text-dark fw-bold">Daftar Negara Favorit Pengguna</span>
+    </div>
+    <div class="card-body p-0">
+        @if($user->watchlists->count() > 0)
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3 text-muted" style="font-size: 0.85rem;">NEGARA</th>
+                        <th class="px-4 py-3 text-muted" style="font-size: 0.85rem;">DITAMBAHKAN PADA</th>
+                        <th class="px-4 py-3 text-muted" style="font-size: 0.85rem;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($user->watchlists as $watchlist)
+                    <tr>
+                        <td class="px-4 py-3 fw-bold">
+                            <span class="badge bg-info text-dark fw-bold px-3 py-2 rounded-pill">
+                                <i class="fas fa-flag me-1"></i> {{ $watchlist->country->name ?? 'Negara Dihapus' }} ({{ $watchlist->country->code ?? 'N/A' }})
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-muted" style="font-size: 0.9rem;">
+                            <i class="far fa-clock me-1"></i> {{ $watchlist->created_at->format('d M Y, H:i') }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <form action="{{ route('admin.favorites.destroy', $watchlist->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus hak pantau negara ini dari favorit pengguna?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Hapus dari daftar pantau pengguna">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @else
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-folder-open mb-3" style="font-size: 2.5rem; opacity: 0.5;"></i>
+            <h6 class="fw-bold">Belum Ada Favorit</h6>
+            <p class="mb-0" style="font-size: 0.9rem;">Pengguna ini belum menambahkan satu pun negara ke dalam daftar pantauannya.</p>
+        </div>
+        @endif
+    </div>
+</div>
+@endif
 @endsection
