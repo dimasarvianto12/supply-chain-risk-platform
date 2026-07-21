@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('styles')
+@push('styles')
 <style>
     .admin-sidebar {
         background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -37,8 +37,7 @@
         text-align: center;
     }
 </style>
-@parent
-@endsection
+@endpush
 
 @section('content')
 <div class="row g-4">
